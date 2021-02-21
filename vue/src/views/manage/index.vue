@@ -121,7 +121,7 @@ export default {
     roleFilter(role) {
       const statusMap = {
         'admin': 'success',
-        'shop': 'gray',
+        'shoper': 'gray',
         'buyer': 'info'
       }
       return statusMap[role]

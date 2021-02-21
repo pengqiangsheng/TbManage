@@ -7,7 +7,7 @@ const getDefaultState = () => {
     },
     roleList: {
       'admin': '管理员',
-      'shop': '卖家',
+      'shoper': '卖家',
       'buyer': '刷手'
     }
   }

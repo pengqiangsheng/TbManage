@@ -59,8 +59,8 @@
         </span>
       </el-form-item>
 
-      <el-form-item prop="role">
-        <el-select v-model="loginForm.role" placeholder="请选择角色">
+      <el-form-item prop="roles">
+        <el-select v-model="loginForm.roles" placeholder="请选择角色">
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -70,7 +70,7 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item v-if="loginForm.role === 2" prop="country">
+      <el-form-item v-if="loginForm.roles === 'buyer'" prop="country">
         <el-select v-model="loginForm.country" placeholder="请选择国家">
           <el-option
             v-for="item in countryOptions"
@@ -124,11 +124,11 @@ export default {
       },
       options: [
         {
-          value: 1,
+          value: 'shoper',
           label: '卖家'
         },
         {
-          value: 2,
+          value: 'buyer',
           label: '买家'
         }
       ],
@@ -144,7 +144,7 @@ export default {
       ],
       loginRules: {
         country: [{ required: true, trigger: 'change' }],
-        role: [{ required: true, trigger: 'change' }],
+        roles: [{ required: true, trigger: 'change' }],
         username: [{ required: true, trigger: 'blur' }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }],
         confirmPwd: [{ required: true, trigger: 'change', validator: validateConfirmPwd }]
