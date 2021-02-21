@@ -1,0 +1,31 @@
+{
+  "name": "ywdd-koa",
+  "version": "1.0.0",
+  "description": "ywdd in koa",
+  "main": "app.js",
+  "dependencies": {
+    "@koa/router": "^8.0.8",
+    "@pengqiangsheng/apicache": "^1.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.11.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-jwt": "^3.6.0",
+    "koa-logger": "^3.2.1",
+    "koa-static": "^5.0.0",
+    "koa-views": "^6.2.1",
+    "koa2-cors": "^2.0.6",
+    "mysql": "^2.18.1",
+    "pug": "^2.0.4",
+    "underscore": "^1.10.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "scripts": {
+    "start": "set NODE_ENV=production&& set DEBUG=app:*&& nodemon app.js",
+    "dev": "set NODE_ENV=development&& set DEBUG=app:*&& nodemon app.js",
+    "debug": "nodemon --inspect app.js"
+  },
+  "author": "pengqiangsheng",
+  "license": "ISC"
+}
