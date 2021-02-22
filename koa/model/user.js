@@ -19,5 +19,6 @@ module.exports = {
   findByName: name => find.findByparams(USER, {
     key: 'username',
     value: name
-  })
+  }),
+  topUp: (id, money) => update.updateById(USER, id, 'money', money)
 }

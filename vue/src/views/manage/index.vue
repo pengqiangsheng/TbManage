@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row class="button-wrapper">
-      <el-col><el-button type="primary" @click="open">新建任务</el-button></el-col>
+      <el-col><el-button type="primary" >操作记录</el-button></el-col>
     </el-row>
     <el-row>
       <el-table
@@ -28,6 +28,11 @@
             <span>{{ scope.row.password }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="余额" min-width="80" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.money }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="国家" min-width="100" align="center">
           <template slot-scope="scope">
             {{ scope.row.country }}
@@ -43,9 +48,10 @@
             <el-tag :type="scope.row.status | statusFilter">{{ typeHelper(scope.row.status, statusList) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="操作" width="110" align="center">
+        <el-table-column class-name="status-col" label="操作" min-width="200" align="center">
           <template slot-scope="scope">
             <el-button v-if="scope.row.status === -1" type="primary" @click="active(scope.row.id)">激活</el-button>
+            <el-button v-if="scope.row.roles === 'shoper'" type="danger" @click="openTopUp(scope.row.username)">充值</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -58,42 +64,21 @@
         @pageSize="pageSizeAccept"
       />
     </el-row>
-    <el-dialog title="任务信息" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
-      <el-row>
-        <el-form :model="form" label-width="80px">
-          <el-col :span="12">
-            <el-form-item label="店铺" :label-width="formLabelWidth">
-              <el-input v-model="form.shop" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="网址" :label-width="formLabelWidth">
-              <el-input v-model="form.site" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="key" :label-width="formLabelWidth">
-              <el-input v-model="form.t_key" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="sku" :label-width="formLabelWidth">
-              <el-input v-model="form.sku" autocomplete="off" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="价格" :label-width="formLabelWidth">
-              <el-input v-model="form.price" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="汇率" :label-width="formLabelWidth">
-              <el-input v-model="form.rate" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="佣金" :label-width="formLabelWidth">
-              <el-input v-model="form.commission" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="总金额" :label-width="formLabelWidth">
-              <el-input v-model="form.total" autocomplete="off" />
-            </el-form-item>
-          </el-col>
-        </el-form>
-      </el-row>
+    <el-dialog title="充值" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="用户名" :label-width="formLabelWidth">
+          <el-input v-model="form.username" :disabled="true" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="充值金额" :label-width="formLabelWidth">
+          <el-input v-model="form.money" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="订单号码" :label-width="formLabelWidth">
+          <el-input v-model="form.order" autocomplete="off" />
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submit">确 定</el-button>
+        <el-button type="primary" :loading="loading" @click="submit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -101,7 +86,7 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getList, activeUser } from '@/api/user'
+import { getList, activeUser, topUp } from '@/api/user'
 import { typeHelper } from '@/utils'
 import { mapGetters } from 'vuex'
 
@@ -137,18 +122,13 @@ export default {
       totalSize: 1,
       totalPage: 1,
       form: {
-        site: '',
-        shop: '',
-        t_key: '',
-        sku: '',
-        price: '',
-        rate: '',
-        commission: '',
-        total: '',
-        status: ''
+        username: '',
+        money: '',
+        order: ''
       },
       formLabelWidth: '80px',
-      dialogFormVisible: false
+      dialogFormVisible: false,
+      loading: false
     }
   },
   computed: {
@@ -174,19 +154,38 @@ export default {
     open() {
       this.dialogFormVisible = true
       this.form = {
-        site: '',
-        shop: '',
-        t_key: '',
-        sku: '',
-        price: '',
-        rate: '',
-        commission: '',
-        total: '',
-        status: ''
+        username: '',
+        money: '',
+        order: ''
+      }
+    },
+    openTopUp(username) {
+      this.dialogFormVisible = true
+      this.form = {
+        username: username,
+        money: 0,
+        order: ''
       }
     },
     submit() {
-      this.dialogFormVisible = false
+      this.loading = true
+      topUp({
+        account: this.form.username,
+        money: +this.form.money,
+        order: this.form.order
+      }).then(res => {
+        this.loading = false
+        if (res.code === 200) {
+          this.$message.success('充值成功')
+          this.dialogFormVisible = false
+          this.fetchData()
+        } else {
+          this.$message.error(res.msg)
+        }
+      }).catch(err => {
+        this.$message.error(err)
+        this.loading = false
+      })
     },
     active(id) {
       console.log(id)

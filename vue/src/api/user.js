@@ -45,3 +45,11 @@ export function activeUser(data) {
     data
   })
 }
+
+export function topUp(data) {
+  return request({
+    url: '/user/topup',
+    method: 'post',
+    data
+  })
+}

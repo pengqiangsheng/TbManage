@@ -3,5 +3,6 @@ module.exports = {
   CAT: 'cat',
   CLEARCACHE: 'clearCache',
   TASK: 'tasks',
-  USER: 'users'
+  USER: 'users',
+  BILL: 'bills'
 }
