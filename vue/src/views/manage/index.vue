@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row class="button-wrapper">
-      <el-col><el-button type="primary" >操作记录</el-button></el-col>
+      <el-col><el-button type="primary">操作记录</el-button></el-col>
     </el-row>
     <el-row>
       <el-table
