@@ -32,7 +32,7 @@ const mutations = {
   },
   SET_USER: (state, user) => {
     state.userObj = user
-  },
+  }
 }
 
 const actions = {

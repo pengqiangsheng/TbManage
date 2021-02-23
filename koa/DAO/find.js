@@ -23,7 +23,29 @@ const findByparams = async(table, params) => {
   return data
 }
 
+/**
+ * 查找数据
+ * @param {*表名} table 
+ * @param {*params} params 
+ */
+const findListByParams = async(table, ...params) => {
+
+  let sql = `select * from ${table} where `
+  for(let i=0; i < params.length; i++) {
+    if(i%2) {
+      sql += `${params[i]} and `
+    }else {
+      sql += `${params[i]} = `
+    }
+  }
+  sql = sql.slice(0, -5)
+  const data = await row(sql)
+
+  return data
+}
+
 module.exports = find = {
   list,
-  findByparams
+  findByparams,
+  findListByParams
 }

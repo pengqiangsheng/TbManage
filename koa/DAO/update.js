@@ -9,11 +9,12 @@ const updateById = async(table, id, ...params) => {
   let sql = `UPDATE ${table} SET `
   for(let i=0; i < params.length; i++) {
     if(i%2) {
-      sql += params[i]
+      sql += `${params[i]},`
     }else {
       sql += `${params[i]} = `
     }
   }
+  sql = sql.slice(0, -1)
   sql += ` WHERE id = ?;`
   const data = await execute(sql, id)
   return data

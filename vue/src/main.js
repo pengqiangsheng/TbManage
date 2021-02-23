@@ -15,6 +15,8 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+import dayjs from 'dayjs'
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -34,6 +36,12 @@ Vue.use(ElementUI, { locale })
 // Vue.use(ElementUI)
 
 Vue.config.productionTip = false
+
+Vue.prototype.$dayjs = dayjs
+
+Vue.filter('timeFilter', val => {
+  return dayjs(val).format('YYYY-MM-DD hh:mm:ss')
+})
 
 new Vue({
   el: '#app',

@@ -5,7 +5,8 @@ module.exports = {
   deleteById: id => del.deleteById(BILL, id),
   save: data => add.addOne(BILL, data),
   list: () => find.list(BILL),
-  active: id => update.updateById(BILL, id, 'status', 1),
+  getListByParams: (...params) => find.findListByParams(BILL, ...params),
+  check: (id, ...params) => update.updateById(BILL, id, ...params),
   findByName: name => find.findByparams(BILL, {
     key: 'username',
     value: name

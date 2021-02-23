@@ -1,7 +1,9 @@
 <template>
   <div>
     <el-row class="button-wrapper">
-      <el-col><el-button type="primary" >操作记录</el-button></el-col>
+      <el-col>
+        <el-button type="primary" @click="open">充值申请</el-button>
+      </el-col>
     </el-row>
     <el-row>
       <el-table
@@ -13,45 +15,44 @@
         fit
         highlight-current-row
       >
-        <el-table-column align="center" label="ID" width="95">
+        <el-table-column align="center" label="序号" width="95">
           <template slot-scope="scope">
-            {{ scope.row.id }}
+            {{ scope.$index }}
           </template>
         </el-table-column>
-        <el-table-column label="用户名" min-width="100">
+        <el-table-column label="订单号" min-width="200">
           <template slot-scope="scope">
-            {{ scope.row.username }}
+            {{ scope.row.order }}
           </template>
         </el-table-column>
-        <el-table-column label="密码" min-width="200" align="center">
+        <el-table-column label="平台" min-width="80" align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.password }}</span>
+            <span>{{ scope.row.platform }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="余额" min-width="80" align="center">
+        <el-table-column label="充值金额" min-width="80" align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.money }}</span>
+            <span>{{ scope.row.rechargeMoney }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="国家" min-width="100" align="center">
+        <el-table-column label="申请时间" min-width="200" align="center">
           <template slot-scope="scope">
-            {{ scope.row.country }}
+            {{ scope.row.createTime | timeFilter }}
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="角色" min-width="80" align="center">
+        <el-table-column label="审核状态" min-width="80" align="center">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.roles | roleFilter">{{ typeHelper(scope.row.roles, roleList) }}</el-tag>
+            <el-tag :type="scope.row.isCheck | statusFilter">{{ typeHelper(scope.row.isCheck, checkList) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="状态" min-width="80" align="center">
+        <el-table-column label="到账时间" min-width="200" align="center">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.status | statusFilter">{{ typeHelper(scope.row.status, statusList) }}</el-tag>
+            {{ scope.row.updateTime | timeFilter }}
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="操作" min-width="200" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === -1" type="primary" @click="active(scope.row.id)">激活</el-button>
-            <!-- <el-button v-if="scope.row.roles === 'shoper'" type="danger" @click="openTopUp(scope.row.username)">充值</el-button> -->
+            <el-button type="primary" @click="appeal(scope.row.id)">申诉</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -64,16 +65,23 @@
         @pageSize="pageSizeAccept"
       />
     </el-row>
-    <el-dialog title="充值" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
+    <el-dialog title="充值申请" :width="'400px'" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
       <el-form :model="form" label-width="80px">
-        <el-form-item label="用户名" :label-width="formLabelWidth">
-          <el-input v-model="form.username" :disabled="true" autocomplete="off" />
-        </el-form-item>
         <el-form-item label="充值金额" :label-width="formLabelWidth">
-          <el-input v-model="form.money" autocomplete="off" />
+          <el-input v-model="form.rechargeMoney" autocomplete="off" />
         </el-form-item>
         <el-form-item label="订单号码" :label-width="formLabelWidth">
           <el-input v-model="form.order" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="充值平台" :label-width="formLabelWidth">
+          <el-select v-model="form.platform" placeholder="请选择充值平台">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -86,7 +94,7 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getList, activeUser, topUp } from '@/api/user'
+import { getBillList, billApply } from '@/api/user'
 import { typeHelper } from '@/utils'
 import { mapGetters } from 'vuex'
 
@@ -98,18 +106,9 @@ export default {
     statusFilter(status) {
       const statusMap = {
         '1': 'success',
-        '-1': 'gray',
-        '0': 'danger'
+        '0': 'gray'
       }
       return statusMap[status]
-    },
-    roleFilter(role) {
-      const statusMap = {
-        'admin': 'success',
-        'shoper': 'gray',
-        'buyer': 'info'
-      }
-      return statusMap[role]
     }
   },
   data() {
@@ -122,17 +121,31 @@ export default {
       totalSize: 1,
       totalPage: 1,
       form: {
-        username: '',
-        money: '',
-        order: ''
+        rechargeMoney: '',
+        order: '',
+        platform: ''
       },
       formLabelWidth: '80px',
       dialogFormVisible: false,
-      loading: false
+      loading: false,
+      checkList: {
+        1: '通过',
+        0: '审核中'
+      },
+      options: [
+        {
+          value: 'alipay',
+          label: '支付宝'
+        },
+        {
+          value: 'wechat',
+          label: '微信'
+        }
+      ]
     }
   },
   computed: {
-    ...mapGetters(['statusList', 'roleList'])
+    ...mapGetters(['statusList', 'roleList', 'name'])
   },
   created() {
     this.fetchData()
@@ -140,7 +153,9 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = false
-      getList().then(res => {
+      getBillList({
+        username: this.name
+      }).then(res => {
         console.log(res)
         this.list = res.data
       })
@@ -154,29 +169,22 @@ export default {
     open() {
       this.dialogFormVisible = true
       this.form = {
-        username: '',
-        money: '',
-        order: ''
-      }
-    },
-    openTopUp(username) {
-      this.dialogFormVisible = true
-      this.form = {
-        username: username,
-        money: 0,
-        order: ''
+        rechargeMoney: '',
+        order: '',
+        platform: ''
       }
     },
     submit() {
       this.loading = true
-      topUp({
-        username: this.form.username,
-        money: +this.form.money,
-        order: this.form.order
+      billApply({
+        username: this.name,
+        rechargeMoney: +this.form.rechargeMoney,
+        order: this.form.order,
+        platform: this.form.platform
       }).then(res => {
         this.loading = false
         if (res.code === 200) {
-          this.$message.success('充值成功')
+          this.$message.success('操作成功')
           this.dialogFormVisible = false
           this.fetchData()
         } else {
@@ -187,13 +195,8 @@ export default {
         this.loading = false
       })
     },
-    active(id) {
+    appeal(id) {
       console.log(id)
-      activeUser({ id: id }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
-      })
     }
   }
 }
