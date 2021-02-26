@@ -1,14 +1,67 @@
 const { row, first } = require('../mysql')
 
 /**
+ * 计算表中有多少条记录
+ * @param {*表名} table 
+ * @param {*字段} id 
+ */
+const countTable = async (table, id = 'id') => {
+  const sql = `SELECT count(${id}) FROM ${table}`
+  const obj = await first(sql)
+  return obj['count(id)']
+}
+
+const PAGEOBJ = {
+  pageNum: 1,
+  pageSize: 10,
+  totalSize: 0,
+  totalPage: 0,
+}
+
+const getPageInfo = async (pageSize, table) => {
+  const totalSize = await countTable(table)
+  const totalPage = Math.ceil(totalSize / pageSize)
+  return { totalSize,  totalPage }
+}
+
+/**
  * 查找数据
  * @param {*表名} table 
  * @param {*id} id 
  */
-const list = async(table) => {
-  const sql = `select * from ${table}`
-  const data = await row(sql)
-  return data
+const list = async(table, pageObj = PAGEOBJ, params = []) => {
+  let sql = null
+  if(!params.length) {
+    // all
+    sql = `select * from ${table}`
+  }else {
+    // fliter by params
+    sql = `select * from ${table} where `
+    for(let i=0; i < params.length; i++) {
+      if(i%2) {
+        sql += `${params[i]} and `
+      }else {
+        sql += `${params[i]} = `
+      }
+    }
+    sql = sql.slice(0, -5)
+  }
+
+  // add page
+  const { pageNum, pageSize } = pageObj
+  if(pageObj.totalSize) {
+    sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
+    const list = await row(sql)
+    return { list, pageObj }
+  }
+  const { totalSize, totalPage } = await getPageInfo(pageSize, table)
+  pageObj.totalSize = totalSize
+  pageObj.totalPage = totalPage
+
+  sql += ` LIMIT ${(pageNum - 1) * pageSize},   ${pageSize}`
+  const list = await row(sql)
+
+  return { list, pageObj }
 }
 
 /**
@@ -44,8 +97,43 @@ const findListByParams = async(table, ...params) => {
   return data
 }
 
+/**
+ * 内联查询
+ * @param {*} tA 
+ * @param {*} tB 
+ * @param {*} username 
+ */
+const getJoinList = async (tA, tB, username) => {
+  const sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
+              b.platform,b.site,b.rate,b.commission
+              from ${tA} a 
+              join ${tB} b 
+              on a.rid = b.id and a.username = '${username}';`
+  const data = await row(sql)
+  return data         
+}
+
+/**
+ * 外联
+ * 
+ * 
+to left
+select a.id,a.name,a.addrid,b.country,b.city
+from student a left join addr b
+on a.addrid=b.addrid;
+
+to right
+select a.id,a.name,a.addrid,b.country,b.city
+from student a right join addr b
+on a.addrid=b.addrid;
+ */
+
+
+
 module.exports = find = {
   list,
   findByparams,
-  findListByParams
+  findListByParams,
+  countTable,
+  getJoinList
 }

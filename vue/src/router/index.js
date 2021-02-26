@@ -118,6 +118,18 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/taskManage',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'taskManage',
+        component: () => import('@/views/seller/task/index'),
+        meta: { title: '任务管理', icon: 'form', roles: ['shoper'] }
+      }
+    ]
+  },
+  {
     path: '/rechargeManage',
     component: Layout,
     children: [

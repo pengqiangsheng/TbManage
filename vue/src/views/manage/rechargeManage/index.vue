@@ -95,7 +95,8 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getBillList, topUp } from '@/api/user'
+import { topUp } from '@/api/user'
+import { getBillList } from '@/api/bill'
 import { typeHelper } from '@/utils'
 import { mapGetters } from 'vuex'
 
@@ -157,7 +158,7 @@ export default {
       this.listLoading = false
       getBillList().then(res => {
         console.log(res)
-        this.list = res.data
+        this.list = res.data.list
       })
     },
     pageNumAccept() {

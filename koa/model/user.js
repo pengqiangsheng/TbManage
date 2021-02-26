@@ -14,7 +14,7 @@ const { USER } = require('../tools/constant')
 module.exports = {
   deleteById: id => del.deleteById(USER, id),
   save: data => add.addOne(USER, data),
-  list: () => find.list(USER),
+  list: (pageObj) => find.list(USER, pageObj),
   active: id => update.updateById(USER, id, 'status', 1),
   findByName: name => find.findByparams(USER, {
     key: 'username',

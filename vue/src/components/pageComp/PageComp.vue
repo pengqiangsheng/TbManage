@@ -44,7 +44,6 @@ export default {
   methods: {
     handleSizeChange(val) {
       this.$emit('pageSize', val)
-      this.$emit('pageNum', 1)
     },
     handleNumChange(val) {
       this.$emit('pageNum', val)

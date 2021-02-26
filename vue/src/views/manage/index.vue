@@ -119,8 +119,8 @@ export default {
       listLoading: true,
       pageNum: 1,
       pageSize: 10,
-      totalSize: 1,
-      totalPage: 1,
+      totalSize: 0,
+      totalPage: 0,
       form: {
         username: '',
         money: '',
@@ -140,16 +140,28 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = false
-      getList().then(res => {
-        console.log(res)
-        this.list = res.data
+      getList({
+        pageObj: {
+          pageNum: this.pageNum,
+          pageSize: this.pageSize,
+          totalSize: this.totalSize,
+          totalPage: this.totalPage
+        }
+      }).then(res => {
+        const { list, pageObj } = res.data
+        this.totalSize = pageObj.totalSize
+        this.totalPage = pageObj.totalPage
+        this.list = list
       })
     },
-    pageNumAccept() {
-      console.log('11')
+    pageNumAccept(val) {
+      this.pageNum = val
+      this.fetchData()
     },
-    pageSizeAccept() {
-      console.log('11')
+    pageSizeAccept(val) {
+      this.pageNum = 1
+      this.pageSize = val
+      this.fetchData()
     },
     open() {
       this.dialogFormVisible = true

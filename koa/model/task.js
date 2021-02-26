@@ -1,5 +1,5 @@
 const { add, del, find, update } = require('../DAO')
-const { TASK } = require('../tools/constant')
+const { TASK, RATE } = require('../tools/constant')
 // const taskClass = {
 //   site: '',
 //   shop: '',
@@ -14,5 +14,6 @@ const { TASK } = require('../tools/constant')
 module.exports = {
   deleteById: id => del.deleteById(TASK, id),
   add: data => add.addOne(TASK, data),
-  list: () => find.list(TASK)
+  list: () => find.list(TASK),
+  getJoinList: (username) => find.getJoinList(TASK, RATE, username)
 }

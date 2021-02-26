@@ -23,9 +23,19 @@
             {{ scope.row.site }}
           </template>
         </el-table-column>
+        <el-table-column label="平台" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.platform }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="链接" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.link }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="店铺" width="110" align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.shop }}</span>
+            <span>{{ scope.row.shopName }}</span>
           </template>
         </el-table-column>
         <el-table-column label="关键词" width="110" align="center">
@@ -122,7 +132,9 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getList, addList, delTask } from '@/api/table'
+import { getList, addList, delTask } from '@/api/task'
+import { mapGetters } from 'vuex'
+
 export default {
   components: {
     PageComp
@@ -172,13 +184,19 @@ export default {
       dialogFormVisible: false
     }
   },
+  computed: {
+    ...mapGetters(['statusList', 'roleList', 'name'])
+  },
   created() {
     this.fetchData()
   },
   methods: {
     fetchData() {
+      console.log('fetch', this.name)
       this.listLoading = false
-      getList().then(res => {
+      getList({
+        username: this.name
+      }).then(res => {
         console.log(res)
         this.list = res.data
       })

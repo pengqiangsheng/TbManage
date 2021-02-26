@@ -1,24 +1,24 @@
 import request from '@/utils/request'
 
-export function getList(params) {
+export function getRateList(params) {
   return request({
-    url: '/task/list',
+    url: '/rate/list',
     method: 'post',
     params
   })
 }
 
-export function addList(params) {
+export function addRate(params) {
   return request({
-    url: '/task/add',
+    url: '/rate/add',
     method: 'post',
     data: params
   })
 }
 
-export function delTask(params) {
+export function delRate(params) {
   return request({
-    url: '/task/del',
+    url: '/rate/del',
     method: 'post',
     data: params
   })

@@ -94,7 +94,7 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getBillList, billApply } from '@/api/user'
+import { getBillList, billApply } from '@/api/bill'
 import { typeHelper } from '@/utils'
 import { mapGetters } from 'vuex'
 
