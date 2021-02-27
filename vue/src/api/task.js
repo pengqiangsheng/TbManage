@@ -23,3 +23,27 @@ export function delTask(params) {
     data: params
   })
 }
+
+export function receiveTask(data) {
+  return request({
+    url: '/task/receive',
+    method: 'post',
+    data
+  })
+}
+
+export function getUnreceiveList(data) {
+  return request({
+    url: '/task/unreceive/list',
+    method: 'post',
+    data
+  })
+}
+
+export function completeTask(data) {
+  return request({
+    url: '/task/complete',
+    method: 'post',
+    data
+  })
+}

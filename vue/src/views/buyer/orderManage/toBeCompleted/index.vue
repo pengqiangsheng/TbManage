@@ -1,8 +1,5 @@
 <template>
   <div>
-    <el-row class="button-wrapper">
-      <el-col><el-button type="primary" @click="open">新建任务</el-button></el-col>
-    </el-row>
     <el-row>
       <el-table
         v-loading="listLoading"
@@ -76,8 +73,7 @@
         </el-table-column>
         <el-table-column class-name="status-col" label="操作" width="110" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === 1" type="primary" size="small" @click="del(scope.row.id)">删除</el-button>
-            <el-button v-if="scope.row.status === 3" type="primary" size="small" @click="complete(scope.row.id)">确认完成</el-button>
+            <el-button v-if="scope.row.status === 2" type="primary" size="small" @click="completeOrder(scope.row.id)">完成</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -168,7 +164,7 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getList, addList, delTask, completeTask } from '@/api/task'
+import { getList, completeTask } from '@/api/task'
 import { getRateList } from '@/api/rate'
 import { mapGetters } from 'vuex'
 import { typeHelper } from '@/utils'
@@ -206,8 +202,8 @@ export default {
       listLoading: true,
       pageNum: 1,
       pageSize: 10,
-      totalSize: 0,
-      totalPage: 0,
+      totalSize: 1,
+      totalPage: 1,
       form: {
         shopName: '',
         link: '',
@@ -225,13 +221,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['statusList', 'roleList', 'name', 'taskStatusList'])
+    ...mapGetters(['taskStatusList', 'name'])
   },
   created() {
     this.fetchData()
   },
   methods: {
     fetchData() {
+      console.log('fetch', this.name)
       this.listLoading = false
       getList({
         pageObj: {
@@ -244,17 +241,14 @@ export default {
         const { list, pageObj } = res.data
         this.totalSize = pageObj.totalSize
         this.totalPage = pageObj.totalPage
-        this.list = list
+        this.list = list.filter(row => row.status >= 2 && row.status < 5)
       })
     },
-    pageNumAccept(val) {
-      this.pageNum = val
-      this.fetchData()
+    pageNumAccept() {
+      console.log('11')
     },
-    pageSizeAccept(val) {
-      this.pageNum = 1
-      this.pageSize = val
-      this.fetchData()
+    pageSizeAccept() {
+      console.log('11')
     },
     open() {
       this.dialogFormVisible = true
@@ -278,22 +272,14 @@ export default {
     newTask() {
       this.disabled = true
       this.dialogFormVisible = false
-      const { id } = this.multipleSelection[0]
-      addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
-      })
+      // const { id } = this.multipleSelection[0]
+      // addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
+      //   this.$message.success('操作成功')
+      //   this.fetchData()
+      //   console.log(res)
+      // })
     },
-    del(id) {
-      console.log(id)
-      delTask({ id: id }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
-      })
-    },
-    complete(id) {
+    completeOrder(id) {
       completeTask({ id: id }).then(res => {
         this.$message.success('操作成功')
         this.fetchData()

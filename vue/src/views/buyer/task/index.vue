@@ -71,13 +71,12 @@
         </el-table-column>
         <el-table-column class-name="status-col" label="状态" width="110" align="center">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.status | statusFilter">{{ typeHelper(scope.row.status, taskStatusList) }}</el-tag>
+            <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="操作" width="110" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === 1" type="primary" size="small" @click="del(scope.row.id)">删除</el-button>
-            <el-button v-if="scope.row.status === 3" type="primary" size="small" @click="complete(scope.row.id)">确认完成</el-button>
+            <el-button type="primary" @click="receiveOrder(scope.row.id)">接单</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -168,10 +167,9 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getList, addList, delTask, completeTask } from '@/api/task'
+import { getList, addList, delTask } from '@/api/task'
 import { getRateList } from '@/api/rate'
 import { mapGetters } from 'vuex'
-import { typeHelper } from '@/utils'
 
 export default {
   components: {
@@ -189,7 +187,6 @@ export default {
   },
   data() {
     return {
-      typeHelper: typeHelper,
       list: [
         {
           site: 'http://inner.ink',
@@ -206,8 +203,8 @@ export default {
       listLoading: true,
       pageNum: 1,
       pageSize: 10,
-      totalSize: 0,
-      totalPage: 0,
+      totalSize: 1,
+      totalPage: 1,
       form: {
         shopName: '',
         link: '',
@@ -225,36 +222,27 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['statusList', 'roleList', 'name', 'taskStatusList'])
+    ...mapGetters(['statusList', 'roleList', 'name'])
   },
   created() {
     this.fetchData()
   },
   methods: {
     fetchData() {
+      console.log('fetch', this.name)
       this.listLoading = false
       getList({
-        pageObj: {
-          pageNum: this.pageNum,
-          pageSize: this.pageSize,
-          totalSize: this.totalSize,
-          totalPage: this.totalPage
-        }
+        username: this.name
       }).then(res => {
-        const { list, pageObj } = res.data
-        this.totalSize = pageObj.totalSize
-        this.totalPage = pageObj.totalPage
-        this.list = list
+        console.log(res)
+        this.list = res.data
       })
     },
-    pageNumAccept(val) {
-      this.pageNum = val
-      this.fetchData()
+    pageNumAccept() {
+      console.log('11')
     },
-    pageSizeAccept(val) {
-      this.pageNum = 1
-      this.pageSize = val
-      this.fetchData()
+    pageSizeAccept() {
+      console.log('11')
     },
     open() {
       this.dialogFormVisible = true
@@ -285,16 +273,9 @@ export default {
         console.log(res)
       })
     },
-    del(id) {
+    receiveOrder(id) {
       console.log(id)
       delTask({ id: id }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
-      })
-    },
-    complete(id) {
-      completeTask({ id: id }).then(res => {
         this.$message.success('操作成功')
         this.fetchData()
         console.log(res)

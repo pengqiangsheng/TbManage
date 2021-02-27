@@ -4,6 +4,6 @@ module.exports = {
   CLEARCACHE: 'clearCache',
   TASK: 'tasks',
   USER: 'users',
-  BILL: 'bills',
+  BILL: 'recharge_bills',
   RATE: 'rates'
 }

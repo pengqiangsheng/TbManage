@@ -71,7 +71,7 @@ router.post('/login', async ctx => {
           ctx.body = {
             code: 200,
             msg: '登录成功',
-            token: generateToken(username)
+            token: generateToken(username, _user.roles)
           }
         }else {
           ctx.body = {

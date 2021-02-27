@@ -1,8 +1,5 @@
 <template>
   <div>
-    <el-row class="button-wrapper">
-      <el-col><el-button type="primary" @click="open">新建任务</el-button></el-col>
-    </el-row>
     <el-row>
       <el-table
         v-loading="listLoading"
@@ -76,8 +73,7 @@
         </el-table-column>
         <el-table-column class-name="status-col" label="操作" width="110" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === 1" type="primary" size="small" @click="del(scope.row.id)">删除</el-button>
-            <el-button v-if="scope.row.status === 3" type="primary" size="small" @click="complete(scope.row.id)">确认完成</el-button>
+            <el-button type="primary" size="small" @click="receiveOrder(scope.row.id)">接单</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -168,7 +164,7 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getList, addList, delTask, completeTask } from '@/api/task'
+import { receiveTask, getUnreceiveList } from '@/api/task'
 import { getRateList } from '@/api/rate'
 import { mapGetters } from 'vuex'
 import { typeHelper } from '@/utils'
@@ -225,15 +221,16 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['statusList', 'roleList', 'name', 'taskStatusList'])
+    ...mapGetters(['taskStatusList', 'name'])
   },
   created() {
     this.fetchData()
   },
   methods: {
     fetchData() {
+      console.log('fetch', this.name)
       this.listLoading = false
-      getList({
+      getUnreceiveList({
         pageObj: {
           pageNum: this.pageNum,
           pageSize: this.pageSize,
@@ -278,23 +275,16 @@ export default {
     newTask() {
       this.disabled = true
       this.dialogFormVisible = false
-      const { id } = this.multipleSelection[0]
-      addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
-      })
+      // const { id } = this.multipleSelection[0]
+      // addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
+      //   this.$message.success('操作成功')
+      //   this.fetchData()
+      //   console.log(res)
+      // })
     },
-    del(id) {
+    receiveOrder(id) {
       console.log(id)
-      delTask({ id: id }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
-      })
-    },
-    complete(id) {
-      completeTask({ id: id }).then(res => {
+      receiveTask({ id: id, receiveName: this.name }).then(res => {
         this.$message.success('操作成功')
         this.fetchData()
         console.log(res)

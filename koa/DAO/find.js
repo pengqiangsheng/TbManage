@@ -20,7 +20,7 @@ const PAGEOBJ = {
 
 const getPageInfo = async (pageSize, table) => {
   const totalSize = await countTable(table)
-  const totalPage = Math.ceil(totalSize / pageSize)
+  const totalPage = totalSize > pageSize ? Math.ceil(totalSize / pageSize) : 1
   return { totalSize,  totalPage }
 }
 
@@ -29,7 +29,7 @@ const getPageInfo = async (pageSize, table) => {
  * @param {*表名} table 
  * @param {*id} id 
  */
-const list = async(table, pageObj = PAGEOBJ, params = []) => {
+const list = async(table, pageObj = { ...PAGEOBJ }, params = []) => {
   let sql = null
   if(!params.length) {
     // all
@@ -103,14 +103,24 @@ const findListByParams = async(table, ...params) => {
  * @param {*} tB 
  * @param {*} username 
  */
-const getJoinList = async (tA, tB, username) => {
-  const sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
-              b.platform,b.site,b.rate,b.commission
-              from ${tA} a 
-              join ${tB} b 
-              on a.rid = b.id and a.username = '${username}';`
-  const data = await row(sql)
-  return data         
+const getJoinList = async (sql, pageObj = { ...PAGEOBJ }) => {
+  // add page
+  const { pageNum, pageSize } = pageObj
+
+  if(pageObj.totalSize) {
+    sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
+    const list = await row(sql)
+    return { list, pageObj }
+  }
+
+  const { length: totalSize } = await row(sql)
+  const totalPage = totalSize > pageSize ? Math.ceil(totalSize / pageSize) : 1
+  pageObj.totalSize = totalSize
+  pageObj.totalPage = totalPage
+
+  sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
+  const list = await row(sql)
+  return { list, pageObj }
 }
 
 /**

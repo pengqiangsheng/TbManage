@@ -1,14 +1,11 @@
 <template>
   <div>
-    <el-row class="button-wrapper">
-      <el-col><el-button type="primary" @click="open">新建汇率</el-button></el-col>
-    </el-row>
     <el-row>
       <el-table
         v-loading="listLoading"
         :data="list"
         element-loading-text="Loading"
-        height="500"
+        height="550"
         border
         fit
         highlight-current-row
@@ -18,29 +15,65 @@
             {{ scope.$index }}
           </template>
         </el-table-column>
-        <el-table-column label="站点" min-width="100">
+        <el-table-column label="站点" min-width="120">
           <template slot-scope="scope">
-            {{ scope.row.username }}
+            {{ scope.row.site }}
           </template>
         </el-table-column>
-        <el-table-column label="汇率" min-width="200" align="center">
+        <el-table-column label="平台" width="110" align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.password }}</span>
+            <span>{{ scope.row.platform }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="佣金" min-width="100" align="center">
+        <el-table-column label="链接" width="110" align="center">
           <template slot-scope="scope">
-            {{ scope.row.country }}
+            <span>{{ scope.row.link }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="平台" min-width="100" align="center">
+        <el-table-column label="店铺" width="110" align="center">
           <template slot-scope="scope">
-            {{ scope.row.country }}
+            <span>{{ scope.row.shopName }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="关键词" width="110" align="center">
+          <template slot-scope="scope">
+            {{ scope.row.t_key }}
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="SKU" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.status }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="created_at" label="单价" width="100">
+          <template slot-scope="scope">
+            <i class="el-icon-time" />
+            <span>{{ scope.row.price }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="汇率" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.rate }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="佣金" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.commission }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="总金额" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.total }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="状态" width="110" align="center">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.status | statusFilter">{{ typeHelper(scope.row.status, taskStatusList) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="操作" width="110" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === -1" type="primary">按钮</el-button>
+            <el-button v-if="scope.row.status === 4" type="primary" size="small" @click="complete(scope.row.id)">结算</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -53,24 +86,77 @@
         @pageSize="pageSizeAccept"
       />
     </el-row>
-    <el-dialog title="汇率信息" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
-      <el-form :model="form" label-width="60px">
-        <el-form-item label="站点">
-          <el-input v-model="form.shop" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="汇率">
-          <el-input v-model="form.site" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="佣金">
-          <el-input v-model="form.t_key" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="平台">
-          <el-input v-model="form.sku" autocomplete="off" />
-        </el-form-item>
-      </el-form>
+    <el-dialog title="任务信息" width="600px" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
+      <el-row>
+        <el-form :model="form" label-width="80px">
+          <el-col :span="12">
+            <el-form-item label="店铺" :label-width="formLabelWidth">
+              <el-input v-model="form.shopName" autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="网址" :label-width="formLabelWidth">
+              <el-input v-model="form.link" autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="key" :label-width="formLabelWidth">
+              <el-input v-model="form.t_key" autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="sku" :label-width="formLabelWidth">
+              <el-input v-model="form.sku" autocomplete="off" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="价格" :label-width="formLabelWidth">
+              <el-input v-model="form.price" autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="优惠券" :label-width="formLabelWidth">
+              <el-input v-model="form.coupon" autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="总金额" :label-width="formLabelWidth">
+              <el-input v-model="form.total" autocomplete="off" />
+            </el-form-item>
+          </el-col>
+          <el-col>
+            <el-table
+              ref="multipleTable"
+              :data="rateList"
+              tooltip-effect="dark"
+              style="width: 100%"
+              @selection-change="handleSelectionChange"
+            >
+              <el-table-column
+                type="selection"
+                width="55"
+              />
+              <el-table-column
+                label="平台"
+                width="120"
+              >
+                <template slot-scope="scope">{{ scope.row.platform }}</template>
+              </el-table-column>
+              <el-table-column
+                label="站点"
+                width="120"
+              >
+                <template slot-scope="scope">{{ scope.row.site }}</template>
+              </el-table-column>
+              <el-table-column
+                label="汇率"
+                show-overflow-tooltip
+              >
+                <template slot-scope="scope">{{ scope.row.rate }}</template>
+              </el-table-column>
+              <el-table-column
+                label="佣金"
+                show-overflow-tooltip
+              >
+                <template slot-scope="scope">{{ scope.row.commission }}</template>
+              </el-table-column>
+            </el-table>
+          </el-col>
+        </el-form>
+      </el-row>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submit">确 定</el-button>
+        <el-button type="primary" :disabled="disabled" @click="newTask">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -78,9 +164,10 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getList } from '@/api/user'
-import { typeHelper } from '@/utils'
+import { getList, addList, delTask, completeTask } from '@/api/task'
+import { getRateList } from '@/api/rate'
 import { mapGetters } from 'vuex'
+import { typeHelper } from '@/utils'
 
 export default {
   components: {
@@ -89,46 +176,52 @@ export default {
   filters: {
     statusFilter(status) {
       const statusMap = {
-        '1': 'success',
-        '-1': 'gray',
-        '0': 'danger'
+        published: 'success',
+        draft: 'gray',
+        deleted: 'danger'
       }
       return statusMap[status]
-    },
-    roleFilter(role) {
-      const statusMap = {
-        '0': 'success',
-        '1': 'gray',
-        '2': 'info'
-      }
-      return statusMap[role]
     }
   },
   data() {
     return {
       typeHelper: typeHelper,
-      list: [],
+      list: [
+        {
+          site: 'http://inner.ink',
+          shop: '好吃点',
+          key: '1',
+          sku: 'sku',
+          price: '99',
+          rate: '1:2',
+          commission: '3',
+          total: '102',
+          status: '1'
+        }
+      ],
       listLoading: true,
       pageNum: 1,
       pageSize: 10,
-      totalSize: 1,
-      totalPage: 1,
+      totalSize: 0,
+      totalPage: 0,
       form: {
-        site: '',
-        shop: '',
+        shopName: '',
+        link: '',
         t_key: '',
         sku: '',
         price: '',
-        rate: '',
-        commission: '',
         total: '',
-        status: ''
+        coupon: ''
       },
-      dialogFormVisible: false
+      formLabelWidth: '80px',
+      dialogFormVisible: false,
+      multipleSelection: [],
+      rateList: [],
+      disabled: true
     }
   },
   computed: {
-    ...mapGetters(['statusList', 'roleList'])
+    ...mapGetters(['statusList', 'roleList', 'name', 'taskStatusList'])
   },
   created() {
     this.fetchData()
@@ -136,33 +229,84 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = false
-      getList().then(res => {
-        console.log(res)
-        this.list = res.data
+      getList({
+        pageObj: {
+          pageNum: this.pageNum,
+          pageSize: this.pageSize,
+          totalSize: this.totalSize,
+          totalPage: this.totalPage
+        }
+      }).then(res => {
+        const { list, pageObj } = res.data
+        this.totalSize = pageObj.totalSize
+        this.totalPage = pageObj.totalPage
+        this.list = list.filter(row => row.status === 5)
       })
     },
-    pageNumAccept() {
-      console.log('11')
+    pageNumAccept(val) {
+      this.pageNum = val
+      this.fetchData()
     },
-    pageSizeAccept() {
-      console.log('11')
+    pageSizeAccept(val) {
+      this.pageNum = 1
+      this.pageSize = val
+      this.fetchData()
     },
     open() {
       this.dialogFormVisible = true
       this.form = {
-        site: '',
-        shop: '',
+        shopName: '',
+        link: '',
         t_key: '',
         sku: '',
         price: '',
-        rate: '',
-        commission: '',
         total: '',
-        status: ''
+        coupon: ''
       }
+      getRateList().then(res => {
+        if (res.code === 200) {
+          this.rateList = res.data.list
+        } else {
+          this.$message.error('系统出错')
+        }
+      })
     },
-    submit() {
+    newTask() {
+      this.disabled = true
       this.dialogFormVisible = false
+      const { id } = this.multipleSelection[0]
+      addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
+        this.$message.success('操作成功')
+        this.fetchData()
+        console.log(res)
+      })
+    },
+    del(id) {
+      console.log(id)
+      delTask({ id: id }).then(res => {
+        this.$message.success('操作成功')
+        this.fetchData()
+        console.log(res)
+      })
+    },
+    complete(id) {
+      completeTask({ id: id }).then(res => {
+        this.$message.success('操作成功')
+        this.fetchData()
+        console.log(res)
+      })
+    },
+    handleSelectionChange(val) {
+      if (val.length > 1) {
+        this.$message.info('只能选择一个！')
+        return this.clearSelection()
+      }
+      this.multipleSelection = val
+      this.disabled = false
+    },
+    clearSelection() {
+      this.$refs.multipleTable.clearSelection()
+      this.disabled = true
     }
   }
 }

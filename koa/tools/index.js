@@ -14,9 +14,12 @@ const getUserInfo = async ({ authorization: token }) => {
   const payload = await util.promisify(jsonwebtoken.verify)(token.split(' ')[1], SECRET)
   return payload
 }
-const generateToken = username => {
+const generateToken = (username, roles) => {
   return jsonwebtoken.sign(
-    { name: username },
+    {
+      name: username,
+      roles: roles
+    },
     SECRET,
     { expiresIn: '1h' }
   )

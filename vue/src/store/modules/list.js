@@ -9,6 +9,14 @@ const getDefaultState = () => {
       'admin': '管理员',
       'shoper': '卖家',
       'buyer': '刷手'
+    },
+    taskStatusList: {
+      1: '待接单',
+      2: '待完成',
+      3: '待确认',
+      4: '待结算',
+      5: '已结算',
+      0: '异常'
     }
   }
 }
