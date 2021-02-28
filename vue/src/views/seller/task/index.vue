@@ -76,7 +76,7 @@
         </el-table-column>
         <el-table-column class-name="status-col" label="操作" width="110" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === 1" type="primary" size="small" @click="del(scope.row.id)">删除</el-button>
+            <el-button v-if="scope.row.status === 1" type="primary" size="small" @click="del(scope.row)">删除</el-button>
             <el-button v-if="scope.row.status === 3" type="primary" size="small" @click="complete(scope.row.id)">确认完成</el-button>
           </template>
         </el-table-column>
@@ -92,12 +92,12 @@
     </el-row>
     <el-dialog title="任务信息" width="600px" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
       <el-row>
-        <el-form :model="form" label-width="80px">
+        <el-form ref="ruleForm" :model="form" :rules="rules" label-width="80px">
           <el-col :span="12">
             <el-form-item label="店铺" :label-width="formLabelWidth">
               <el-input v-model="form.shopName" autocomplete="off" />
             </el-form-item>
-            <el-form-item label="网址" :label-width="formLabelWidth">
+            <el-form-item label="网址" :label-width="formLabelWidth" prop="link">
               <el-input v-model="form.link" autocomplete="off" />
             </el-form-item>
             <el-form-item label="key" :label-width="formLabelWidth">
@@ -108,18 +108,33 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="价格" :label-width="formLabelWidth">
-              <el-input v-model="form.price" autocomplete="off" />
+            <el-form-item label="单价" :label-width="formLabelWidth" prop="price">
+              <el-row>
+                <el-col :span="3">
+                  <el-popover
+                    placement="top-start"
+                    width="220"
+                    trigger="hover"
+                    content="单价的货币为当地货币，总金额会自动计算为人民币"
+                  >
+                    <i slot="reference" class="el-icon-warning-outline" />
+                  </el-popover>
+                </el-col>
+                <el-col :span="21">
+                  <el-input v-model="form.price" autocomplete="off" oninput="value=value.replace(/^\.+|[^\d.]/g,'')" />
+                </el-col>
+              </el-row>
             </el-form-item>
             <el-form-item label="优惠券" :label-width="formLabelWidth">
               <el-input v-model="form.coupon" autocomplete="off" />
             </el-form-item>
             <el-form-item label="总金额" :label-width="formLabelWidth">
-              <el-input v-model="form.total" autocomplete="off" />
+              <el-input v-model="form.total" disabled autocomplete="off" />
             </el-form-item>
           </el-col>
           <el-col>
             <el-table
+              v-if="showTable"
               ref="multipleTable"
               :data="rateList"
               tooltip-effect="dark"
@@ -132,23 +147,25 @@
               />
               <el-table-column
                 label="平台"
-                width="120"
+                min-width="120"
               >
                 <template slot-scope="scope">{{ scope.row.platform }}</template>
               </el-table-column>
               <el-table-column
                 label="站点"
-                width="120"
+                min-width="120"
               >
                 <template slot-scope="scope">{{ scope.row.site }}</template>
               </el-table-column>
               <el-table-column
+                min-width="120"
                 label="汇率"
                 show-overflow-tooltip
               >
                 <template slot-scope="scope">{{ scope.row.rate }}</template>
               </el-table-column>
               <el-table-column
+                min-width="120"
                 label="佣金"
                 show-overflow-tooltip
               >
@@ -190,6 +207,10 @@ export default {
   data() {
     return {
       typeHelper: typeHelper,
+      rules: {
+        price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
+        link: [{ required: true, message: '请输入网址', trigger: 'blur' }]
+      },
       list: [
         {
           site: 'http://inner.ink',
@@ -221,11 +242,17 @@ export default {
       dialogFormVisible: false,
       multipleSelection: [],
       rateList: [],
-      disabled: true
+      disabled: true,
+      showTable: false
     }
   },
   computed: {
     ...mapGetters(['statusList', 'roleList', 'name', 'taskStatusList'])
+  },
+  watch: {
+    'form.price': function(val) {
+      this.showTable = val ? 1 : 0
+    }
   },
   created() {
     this.fetchData()
@@ -244,7 +271,7 @@ export default {
         const { list, pageObj } = res.data
         this.totalSize = pageObj.totalSize
         this.totalPage = pageObj.totalPage
-        this.list = list
+        this.list = list.filter(row => row.status === 1)
       })
     },
     pageNumAccept(val) {
@@ -257,6 +284,7 @@ export default {
       this.fetchData()
     },
     open() {
+      this.disabled = true
       this.dialogFormVisible = true
       this.form = {
         shopName: '',
@@ -276,21 +304,28 @@ export default {
       })
     },
     newTask() {
-      this.disabled = true
-      this.dialogFormVisible = false
       const { id } = this.multipleSelection[0]
-      addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
+      this.$refs.ruleForm.validate((valid) => {
+        if (valid) {
+          addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
+            this.$message.success('操作成功')
+            this.dialogFormVisible = false
+            this.fetchData()
+            this.$store.dispatch('user/getInfo')
+            console.log(res)
+          })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
       })
     },
-    del(id) {
+    del({ id, total }) {
       console.log(id)
-      delTask({ id: id }).then(res => {
-        this.$message.success('操作成功')
+      delTask({ id: id, total: total }).then(res => {
+        this.$message.success(res.msg)
         this.fetchData()
-        console.log(res)
+        this.$store.dispatch('user/getInfo')
       })
     },
     complete(id) {
@@ -306,7 +341,11 @@ export default {
         return this.clearSelection()
       }
       this.multipleSelection = val
-      this.disabled = false
+      if (val.length) {
+        this.disabled = false
+        console.log(val[0].rate)
+        this.form.total = (parseFloat(this.form.price) / parseFloat(val[0].rate) + parseFloat(val[0].commission)).toFixed(6)
+      }
     },
     clearSelection() {
       this.$refs.multipleTable.clearSelection()

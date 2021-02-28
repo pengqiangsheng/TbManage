@@ -6,6 +6,7 @@ const { execute } = require('../mysql')
  * @param {*id} id 
  */
 const updateById = async(table, id, ...params) => {
+  console.log('2.2')
   let sql = `UPDATE ${table} SET `
   for(let i=0; i < params.length; i++) {
     if(i%2) {

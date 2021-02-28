@@ -54,5 +54,12 @@ module.exports = {
   getListByAdmin,
   getListByBuyer,
   getListByShoper,
-  getUnreceiveList
+  getUnreceiveList,
+  getTaskStatus: async id => {
+    const { status } = await find.findByparams(TASK, {
+      key: 'id',
+      value: id
+    })
+    return status
+  }
 }

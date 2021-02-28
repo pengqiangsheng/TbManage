@@ -118,14 +118,29 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/taskManageCenter',
+    path: '/taskCenter',
+    name: 'taskCenter',
     component: Layout,
+    redirect: '/taskCenter/manage',
+    meta: { title: '任务中心', icon: 'form', roles: ['shoper'] },
     children: [
       {
-        path: 'index',
-        name: 'taskManageCenter',
+        path: 'manage',
+        name: 'manage',
         component: () => import('@/views/seller/task/index'),
-        meta: { title: '任务管理', icon: 'form', roles: ['shoper'] }
+        meta: { title: '任务管理', icon: 'form' }
+      },
+      {
+        path: 'load',
+        name: 'load',
+        component: () => import('@/views/seller/load/index'),
+        meta: { title: '进行中', icon: 'form' }
+      },
+      {
+        path: 'end',
+        name: 'end',
+        component: () => import('@/views/seller/end/index'),
+        meta: { title: '已完成', icon: 'form' }
       }
     ]
   },
@@ -133,6 +148,7 @@ export const asyncRoutes = [
     path: '/orderManage',
     component: Layout,
     name: 'orderManage',
+    redirect: '/orderManage/orderCenter',
     meta: { title: '订单管理', icon: 'form', roles: ['buyer'] },
     children: [
       {

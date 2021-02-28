@@ -14,7 +14,8 @@ const simpleErrorHandler = () => async (ctx, next) => {
 
 const interceptToken = () => async (ctx, next) => next().catch((err) => {
   if (err.status === 401) {
-    ctx.status = 401;
+    // ctx.status = 401;
+    ctx.status = 200;
     ctx.body = {
       code: 401,
       msg: err.message

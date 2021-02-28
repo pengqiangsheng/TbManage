@@ -285,9 +285,8 @@ export default {
     receiveOrder(id) {
       console.log(id)
       receiveTask({ id: id, receiveName: this.name }).then(res => {
-        this.$message.success('操作成功')
+        this.$message.success(res.msg)
         this.fetchData()
-        console.log(res)
       })
     },
     handleSelectionChange(val) {
