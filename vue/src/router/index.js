@@ -219,18 +219,18 @@ export const asyncRoutes = [
     ]
   },
 
-  {
-    path: '/fundManage',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'fundManage',
-        component: () => import('@/views/manage/fundManage'),
-        meta: { title: '资金管理', icon: 'form', roles: ['admin'] }
-      }
-    ]
-  },
+  // {
+  //   path: '/fundManage',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'fundManage',
+  //       component: () => import('@/views/manage/fundManage'),
+  //       meta: { title: '资金管理', icon: 'form', roles: ['admin'] }
+  //     }
+  //   ]
+  // },
 
   {
     path: '/taskManage',
