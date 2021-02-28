@@ -111,8 +111,8 @@ export default {
       listLoading: true,
       pageNum: 1,
       pageSize: 10,
-      totalSize: 1,
-      totalPage: 1,
+      totalSize: 0,
+      totalPage: 0,
       form: {
         site: '',
         platform: '',
@@ -131,16 +131,28 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = false
-      getRateList().then(res => {
-        console.log(res)
-        this.list = res.data.list
+      getRateList({
+        pageObj: {
+          pageNum: this.pageNum,
+          pageSize: this.pageSize,
+          totalSize: this.totalSize,
+          totalPage: this.totalPage
+        }
+      }).then(res => {
+        const { list, pageObj } = res.data
+        this.totalSize = pageObj.totalSize
+        this.totalPage = pageObj.totalPage
+        this.list = list
       })
     },
-    pageNumAccept() {
-      console.log('11')
+    pageNumAccept(val) {
+      this.pageNum = val
+      this.fetchData()
     },
-    pageSizeAccept() {
-      console.log('11')
+    pageSizeAccept(val) {
+      this.pageNum = 1
+      this.pageSize = val
+      this.fetchData()
     },
     open() {
       this.dialogFormVisible = true
@@ -166,11 +178,17 @@ export default {
       })
     },
     delRate(id) {
-      delRate({ id }).then(res => {
-        if (res.code === 200) {
-          this.$message.success('操作成功')
-          this.fetchData()
-        }
+      this.$confirm('确定删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delRate({ id }).then(res => {
+          if (res.code === 200) {
+            this.$message.success(res.msg)
+            this.fetchData()
+          }
+        })
       })
     }
   }

@@ -1,7 +1,5 @@
-const { taskModel, User } = require('../model')
-const { getUserInfo } = require('../tools')
-const Singleton = require('../tools/singleton')
-const fn = Singleton.getInstance()
+const { taskModel, User, Log } = require('../model')
+const { getUserInfo, lockHelper } = require('../tools')
 
 module.exports = async (ctx, result) => {
   const obj = ctx.request.body
@@ -11,21 +9,15 @@ module.exports = async (ctx, result) => {
   }
   const { money, id: userId } = await User.findByName(name)
   const { total } = obj
-  const fnName = `momey_${userId}` // 锁住 momey_id 的操作
-  if(fn.queue[fnName]) {
-    throw '系统正忙，请刷新后重试'
-  }
   if(money < total) {
     throw '账户余额不足'
   }
-  
-  fn.lock(fnName, () => {})
-  await User.pay(userId, money - total)
-  fn.unlock(fnName)
 
+  const lockName = `momey_${userId}` // 锁住 momey_id 的操作
+  await lockHelper(lockName, () => User.pay(userId, money - total))
+  const desc = `新建任务，扣费${total}元`
+  await Log.save({ desc: desc, operator: name })
   const data = await taskModel.add(obj)
-  
-  console.log(data)
   result.set({
     code: 200,
     msg: '操作成功',

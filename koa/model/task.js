@@ -1,28 +1,31 @@
 const { add, del, find, update } = require('../DAO')
 const { TASK, RATE } = require('../tools/constant')
 
-let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
-          b.platform,b.site,b.rate,b.commission
-          from ${TASK} a 
-          join ${RATE} b 
-          on a.rid = b.id`
 
-const getListByAdmin = pageObj => find.getJoinList(sql, pageObj)
 
-const getListByBuyer = async (receiveName, pageObj) => {
+const getListByAdmin = async (left, right, pageObj) => {
   let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
-              b.platform,b.site,b.rate,b.commission
-              from ${TASK} a 
-              join ${RATE} b 
-              on a.rid = b.id and a.receiveName = '${receiveName}'`
+            b.platform,b.site,b.rate,b.commission
+            from ${TASK} a 
+            join ${RATE} b 
+            on a.rid = b.id and a.status between ${left} and ${right}`
   return await find.getJoinList(sql, pageObj)
 }
-const getListByShoper = async (username, pageObj) => {
+
+const getListByBuyer = async (receiveName, left, right, pageObj) => {
   let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
               b.platform,b.site,b.rate,b.commission
               from ${TASK} a 
               join ${RATE} b 
-              on a.rid = b.id and a.username = '${username}'`
+              on a.rid = b.id and a.receiveName = '${receiveName}' and a.status between ${left} and ${right}`
+  return await find.getJoinList(sql, pageObj)
+}
+const getListByShoper = async (username, left, right, pageObj) => {
+  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
+              b.platform,b.site,b.rate,b.commission
+              from ${TASK} a 
+              join ${RATE} b 
+              on a.rid = b.id and a.username = '${username}' and a.status between ${left} and ${right}`
   return await find.getJoinList(sql, pageObj)
 }
 

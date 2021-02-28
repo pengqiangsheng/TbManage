@@ -81,7 +81,7 @@ const findByparams = async(table, params) => {
  * @param {*表名} table 
  * @param {*params} params 
  */
-const findListByParams = async(table, ...params) => {
+const findListByParams = async(table, pageObj = { ...PAGEOBJ }, ...params) => {
 
   let sql = `select * from ${table} where `
   for(let i=0; i < params.length; i++) {
@@ -92,9 +92,24 @@ const findListByParams = async(table, ...params) => {
     }
   }
   sql = sql.slice(0, -5)
-  const data = await row(sql)
 
-  return data
+  // add page
+  const { pageNum, pageSize } = pageObj
+
+  if(pageObj.totalSize) {
+    sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
+    const list = await row(sql)
+    return { list, pageObj }
+  }
+
+  const { length: totalSize } = await row(sql)
+  const totalPage = totalSize > pageSize ? Math.ceil(totalSize / pageSize) : 1
+  pageObj.totalSize = totalSize
+  pageObj.totalPage = totalPage
+
+  sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
+  const list = await row(sql)
+  return { list, pageObj }
 }
 
 /**

@@ -266,12 +266,13 @@ export default {
           pageSize: this.pageSize,
           totalSize: this.totalSize,
           totalPage: this.totalPage
-        }
+        },
+        range: [1, 1]
       }).then(res => {
         const { list, pageObj } = res.data
         this.totalSize = pageObj.totalSize
         this.totalPage = pageObj.totalPage
-        this.list = list.filter(row => row.status === 1)
+        this.list = list
       })
     },
     pageNumAccept(val) {
@@ -308,11 +309,9 @@ export default {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
           addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
-            this.$message.success('操作成功')
+            this.$message.success(res.msg)
             this.dialogFormVisible = false
             this.fetchData()
-            this.$store.dispatch('user/getInfo')
-            console.log(res)
           })
         } else {
           console.log('error submit!!')
@@ -321,11 +320,15 @@ export default {
       })
     },
     del({ id, total }) {
-      console.log(id)
-      delTask({ id: id, total: total }).then(res => {
-        this.$message.success(res.msg)
-        this.fetchData()
-        this.$store.dispatch('user/getInfo')
+      this.$confirm('确定删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delTask({ id: id, total: total }).then(res => {
+          this.$message.success(res.msg)
+          this.fetchData()
+        })
       })
     },
     complete(id) {

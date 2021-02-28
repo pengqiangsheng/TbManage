@@ -59,8 +59,19 @@ export const constantRoutes = [
       component: () => import('@/views/dashboard/index'),
       meta: { title: 'Dashboard', icon: 'dashboard' }
     }]
-  }
+  },
 
+  {
+    path: '/about',
+    name: '',
+    component: Layout,
+    children: [{
+      path: 'index',
+      name: 'about',
+      component: () => import('@/views/about/index'),
+      meta: { title: '充值入口', icon: 'dashboard' }
+    }]
+  }
   // {
   //   path: '/example',
   //   component: Layout,
@@ -114,6 +125,18 @@ export const asyncRoutes = [
         name: 'recharge',
         component: () => import('@/views/recharge/index'),
         meta: { title: '充值中心', icon: 'form', roles: ['shoper'] }
+      }
+    ]
+  },
+  {
+    path: '/recode',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'recode',
+        component: () => import('@/views/seller/recode/index'),
+        meta: { title: '操作记录', icon: 'form', roles: ['shoper'] }
       }
     ]
   },

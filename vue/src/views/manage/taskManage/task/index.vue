@@ -235,7 +235,8 @@ export default {
           pageSize: this.pageSize,
           totalSize: this.totalSize,
           totalPage: this.totalPage
-        }
+        },
+        range: [2, 4]
       }).then(res => {
         const { list, pageObj } = res.data
         this.totalSize = pageObj.totalSize
@@ -290,10 +291,15 @@ export default {
       })
     },
     complete(id) {
-      completeTask({ id: id }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
+      this.$confirm('确认结算完成?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        completeTask({ id: id }).then(res => {
+          this.$message.success(res.msg)
+          this.fetchData()
+        })
       })
     },
     handleSelectionChange(val) {

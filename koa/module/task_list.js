@@ -2,21 +2,15 @@ const { taskModel } = require('../model')
 const { getUserInfo } = require('../tools')
 
 module.exports = async (ctx, result) => {
-  const { pageObj } = ctx.request.body
+  const { pageObj, range } = ctx.request.body
   const { name, roles } = await getUserInfo(ctx.headers)
-  // if(!name) {
-  //   throw 'name is null'
-  // }
-  // if(!roles) {
-  //   throw 'roles is null'
-  // }
   let data = {}
   if(roles === 'admin') {
-    data = await taskModel.getListByAdmin(pageObj)
+    data = await taskModel.getListByAdmin(range[0], range[1], pageObj)
   } else if(roles === 'buyer') {
-    data = await taskModel.getListByBuyer(name, pageObj)
+    data = await taskModel.getListByBuyer(name, range[0], range[1], pageObj)
   } else if(roles === 'shoper') {
-    data = await taskModel.getListByShoper(name, pageObj)
+    data = await taskModel.getListByShoper(name, range[0], range[1], pageObj)
   } else {
     throw 'roles is incorrect'
   }

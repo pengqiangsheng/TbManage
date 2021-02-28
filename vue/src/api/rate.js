@@ -1,10 +1,10 @@
 import request from '@/utils/request'
 
-export function getRateList(params) {
+export function getRateList(data) {
   return request({
     url: '/rate/list',
     method: 'post',
-    params
+    data
   })
 }
 

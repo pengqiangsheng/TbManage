@@ -242,12 +242,13 @@ export default {
           pageSize: this.pageSize,
           totalSize: this.totalSize,
           totalPage: this.totalPage
-        }
+        },
+        range: [5, 5]
       }).then(res => {
         const { list, pageObj } = res.data
         this.totalSize = pageObj.totalSize
         this.totalPage = pageObj.totalPage
-        this.list = list.filter(row => row.status === 5)
+        this.list = list
       })
     },
     pageNumAccept(val) {

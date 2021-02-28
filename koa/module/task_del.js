@@ -1,4 +1,4 @@
-const { taskModel, User } = require('../model')
+const { taskModel, User, Log } = require('../model')
 const { getUserInfo, lockHelper } = require('../tools')
 const debug = require('debug')('app:router:del_task')
 
@@ -17,6 +17,8 @@ module.exports = async (ctx, result) => {
   const lockName = `momey_${userId}` // 锁住 momey_id 的操作
   debug('1')
   await lockHelper(lockName, () => User.pay(userId, money + total))
+  const desc = `删除任务，返还${total}元`
+  await Log.save({ desc: desc, operator: name })
   debug('3')
   const data = await taskModel.deleteById(id)
   debug('5')

@@ -5,5 +5,6 @@ module.exports = {
   TASK: 'tasks',
   USER: 'users',
   BILL: 'recharge_bills',
-  RATE: 'rates'
+  RATE: 'rates',
+  LOG: 'logs'
 }

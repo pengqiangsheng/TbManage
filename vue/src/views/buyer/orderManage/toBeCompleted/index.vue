@@ -202,8 +202,8 @@ export default {
       listLoading: true,
       pageNum: 1,
       pageSize: 10,
-      totalSize: 1,
-      totalPage: 1,
+      totalSize: 0,
+      totalPage: 0,
       form: {
         shopName: '',
         link: '',
@@ -228,7 +228,6 @@ export default {
   },
   methods: {
     fetchData() {
-      console.log('fetch', this.name)
       this.listLoading = false
       getList({
         pageObj: {
@@ -236,19 +235,23 @@ export default {
           pageSize: this.pageSize,
           totalSize: this.totalSize,
           totalPage: this.totalPage
-        }
+        },
+        range: [2, 4]
       }).then(res => {
         const { list, pageObj } = res.data
         this.totalSize = pageObj.totalSize
         this.totalPage = pageObj.totalPage
-        this.list = list.filter(row => row.status >= 2 && row.status < 5)
+        this.list = list
       })
     },
-    pageNumAccept() {
-      console.log('11')
+    pageNumAccept(val) {
+      this.pageNum = val
+      this.fetchData()
     },
-    pageSizeAccept() {
-      console.log('11')
+    pageSizeAccept(val) {
+      this.pageNum = 1
+      this.pageSize = val
+      this.fetchData()
     },
     open() {
       this.dialogFormVisible = true
@@ -280,10 +283,15 @@ export default {
       // })
     },
     completeOrder(id) {
-      completeTask({ id: id }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
+      this.$confirm('确认完成任务?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        completeTask({ id: id }).then(res => {
+          this.$message.success(res.msg)
+          this.fetchData()
+        })
       })
     },
     handleSelectionChange(val) {
