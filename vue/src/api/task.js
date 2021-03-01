@@ -24,6 +24,14 @@ export function delTask(params) {
   })
 }
 
+export function mutilDelTask(data) {
+  return request({
+    url: '/task/mutil/del',
+    method: 'post',
+    data
+  })
+}
+
 export function receiveTask(data) {
   return request({
     url: '/task/receive',

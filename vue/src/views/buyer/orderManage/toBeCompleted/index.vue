@@ -15,7 +15,7 @@
             {{ scope.$index }}
           </template>
         </el-table-column>
-        <el-table-column label="站点" min-width="120">
+        <el-table-column label="站点" min-width="120" align="center">
           <template slot-scope="scope">
             {{ scope.row.site }}
           </template>
@@ -46,24 +46,43 @@
           </template>
         </el-table-column>
         <el-table-column align="center" prop="created_at" label="单价" width="100">
+          <template slot="header">
+            <el-popover
+              placement="top-start"
+              width="200"
+              trigger="hover"
+              content="单价为当地货币"
+            >
+              <span slot="reference"><span>单价</span><i class="el-icon-warning-outline" /></span>
+            </el-popover>
+          </template>
           <template slot-scope="scope">
-            <i class="el-icon-time" />
             <span>{{ scope.row.price }}</span>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="汇率" width="110" align="center">
+        <!-- <el-table-column class-name="status-col" label="汇率" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.rate }}</span>
           </template>
-        </el-table-column>
-        <el-table-column class-name="status-col" label="佣金" width="110" align="center">
+        </el-table-column> -->
+        <el-table-column class-name="status-col" label="佣金 RMB" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.commission }}</span>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="总金额" width="110" align="center">
+        <el-table-column class-name="status-col" label="总金额 RMB" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.total }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="订单号" width="200" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.orderNumber }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="备注" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.remark }}</span>
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="状态" width="110" align="center">
@@ -71,9 +90,9 @@
             <el-tag :type="scope.row.status | statusFilter">{{ typeHelper(scope.row.status, taskStatusList) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="操作" width="110" align="center">
+        <el-table-column class-name="status-col" fixed="right" label="操作" width="110" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === 2" type="primary" size="small" @click="completeOrder(scope.row.id)">完成</el-button>
+            <el-button v-if="scope.row.status === 2" type="primary" size="small" @click="open(scope.row.id)">完成</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -86,77 +105,18 @@
         @pageSize="pageSizeAccept"
       />
     </el-row>
-    <el-dialog title="任务信息" width="600px" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
-      <el-row>
-        <el-form :model="form" label-width="80px">
-          <el-col :span="12">
-            <el-form-item label="店铺" :label-width="formLabelWidth">
-              <el-input v-model="form.shopName" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="网址" :label-width="formLabelWidth">
-              <el-input v-model="form.link" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="key" :label-width="formLabelWidth">
-              <el-input v-model="form.t_key" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="sku" :label-width="formLabelWidth">
-              <el-input v-model="form.sku" autocomplete="off" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="价格" :label-width="formLabelWidth">
-              <el-input v-model="form.price" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="优惠券" :label-width="formLabelWidth">
-              <el-input v-model="form.coupon" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="总金额" :label-width="formLabelWidth">
-              <el-input v-model="form.total" autocomplete="off" />
-            </el-form-item>
-          </el-col>
-          <el-col>
-            <el-table
-              ref="multipleTable"
-              :data="rateList"
-              tooltip-effect="dark"
-              style="width: 100%"
-              @selection-change="handleSelectionChange"
-            >
-              <el-table-column
-                type="selection"
-                width="55"
-              />
-              <el-table-column
-                label="平台"
-                width="120"
-              >
-                <template slot-scope="scope">{{ scope.row.platform }}</template>
-              </el-table-column>
-              <el-table-column
-                label="站点"
-                width="120"
-              >
-                <template slot-scope="scope">{{ scope.row.site }}</template>
-              </el-table-column>
-              <el-table-column
-                label="汇率"
-                show-overflow-tooltip
-              >
-                <template slot-scope="scope">{{ scope.row.rate }}</template>
-              </el-table-column>
-              <el-table-column
-                label="佣金"
-                show-overflow-tooltip
-              >
-                <template slot-scope="scope">{{ scope.row.commission }}</template>
-              </el-table-column>
-            </el-table>
-          </el-col>
-        </el-form>
-      </el-row>
+    <el-dialog title="订单信息" width="600px" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
+      <el-form ref="ruleForm" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="订单号" :label-width="formLabelWidth" prop="orderNumber">
+          <el-input v-model="form.orderNumber" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="备注" :label-width="formLabelWidth">
+          <el-input v-model="form.remark" autocomplete="off" />
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" :disabled="disabled" @click="newTask">确 定</el-button>
+        <el-button type="primary" @click="completeOrder">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -165,7 +125,6 @@
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
 import { getList, completeTask } from '@/api/task'
-import { getRateList } from '@/api/rate'
 import { mapGetters } from 'vuex'
 import { typeHelper } from '@/utils'
 
@@ -186,38 +145,23 @@ export default {
   data() {
     return {
       typeHelper: typeHelper,
-      list: [
-        {
-          site: 'http://inner.ink',
-          shop: '好吃点',
-          key: '1',
-          sku: 'sku',
-          price: '99',
-          rate: '1:2',
-          commission: '3',
-          total: '102',
-          status: '1'
-        }
-      ],
+      list: [],
       listLoading: true,
       pageNum: 1,
       pageSize: 10,
       totalSize: 0,
       totalPage: 0,
       form: {
-        shopName: '',
-        link: '',
-        t_key: '',
-        sku: '',
-        price: '',
-        total: '',
-        coupon: ''
+        orderNumber: '',
+        remark: ''
+      },
+      rules: {
+        orderNumber: [{ required: true, message: '请输入订单号', trigger: 'blur' }]
       },
       formLabelWidth: '80px',
       dialogFormVisible: false,
       multipleSelection: [],
-      rateList: [],
-      disabled: true
+      rateList: []
     }
   },
   computed: {
@@ -253,58 +197,31 @@ export default {
       this.pageSize = val
       this.fetchData()
     },
-    open() {
+    open(id) {
       this.dialogFormVisible = true
       this.form = {
-        shopName: '',
-        link: '',
-        t_key: '',
-        sku: '',
-        price: '',
-        total: '',
-        coupon: ''
+        orderNumber: '',
+        remark: '',
+        id: id
       }
-      getRateList().then(res => {
-        if (res.code === 200) {
-          this.rateList = res.data.list
+    },
+    completeOrder() {
+      this.$refs.ruleForm.validate((valid) => {
+        if (valid) {
+          completeTask({
+            id: this.form.id,
+            remark: this.form.remark,
+            orderNumber: this.form.orderNumber
+          }).then(res => {
+            this.$message.success(res.msg)
+            this.dialogFormVisible = false
+            this.fetchData()
+          })
         } else {
-          this.$message.error('系统出错')
+          console.log('error submit!!')
+          return false
         }
       })
-    },
-    newTask() {
-      this.disabled = true
-      this.dialogFormVisible = false
-      // const { id } = this.multipleSelection[0]
-      // addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
-      //   this.$message.success('操作成功')
-      //   this.fetchData()
-      //   console.log(res)
-      // })
-    },
-    completeOrder(id) {
-      this.$confirm('确认完成任务?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        completeTask({ id: id }).then(res => {
-          this.$message.success(res.msg)
-          this.fetchData()
-        })
-      })
-    },
-    handleSelectionChange(val) {
-      if (val.length > 1) {
-        this.$message.info('只能选择一个！')
-        return this.clearSelection()
-      }
-      this.multipleSelection = val
-      this.disabled = false
-    },
-    clearSelection() {
-      this.$refs.multipleTable.clearSelection()
-      this.disabled = true
     }
   }
 }

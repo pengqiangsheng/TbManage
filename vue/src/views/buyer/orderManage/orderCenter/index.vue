@@ -15,7 +15,7 @@
             {{ scope.$index }}
           </template>
         </el-table-column>
-        <el-table-column label="站点" min-width="120">
+        <el-table-column label="站点" min-width="120" align="center">
           <template slot-scope="scope">
             {{ scope.row.site }}
           </template>
@@ -46,24 +46,43 @@
           </template>
         </el-table-column>
         <el-table-column align="center" prop="created_at" label="单价" width="100">
+          <template slot="header">
+            <el-popover
+              placement="top-start"
+              width="200"
+              trigger="hover"
+              content="单价为当地货币"
+            >
+              <span slot="reference"><span>单价</span><i class="el-icon-warning-outline" /></span>
+            </el-popover>
+          </template>
           <template slot-scope="scope">
-            <i class="el-icon-time" />
             <span>{{ scope.row.price }}</span>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="汇率" width="110" align="center">
+        <!-- <el-table-column class-name="status-col" label="汇率" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.rate }}</span>
           </template>
-        </el-table-column>
-        <el-table-column class-name="status-col" label="佣金" width="110" align="center">
+        </el-table-column> -->
+        <el-table-column class-name="status-col" label="佣金 RMB" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.commission }}</span>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="总金额" width="110" align="center">
+        <el-table-column class-name="status-col" label="总金额 RMB" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.total }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="订单号" width="200" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.orderNumber }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="备注" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.remark }}</span>
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="状态" width="110" align="center">

@@ -66,6 +66,16 @@
             <span>{{ scope.row.total }}</span>
           </template>
         </el-table-column>
+        <el-table-column class-name="status-col" label="订单号" width="200" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.orderNumber }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="备注" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.remark }}</span>
+          </template>
+        </el-table-column>
         <el-table-column class-name="status-col" label="状态" width="110" align="center">
           <template slot-scope="scope">
             <el-tag :type="scope.row.status | statusFilter">{{ typeHelper(scope.row.status, taskStatusList) }}</el-tag>
@@ -186,19 +196,7 @@ export default {
   data() {
     return {
       typeHelper: typeHelper,
-      list: [
-        {
-          site: 'http://inner.ink',
-          shop: '好吃点',
-          key: '1',
-          sku: 'sku',
-          price: '99',
-          rate: '1:2',
-          commission: '3',
-          total: '102',
-          status: '1'
-        }
-      ],
+      list: [],
       listLoading: true,
       pageNum: 1,
       pageSize: 10,

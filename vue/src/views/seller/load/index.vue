@@ -15,7 +15,7 @@
             {{ scope.$index }}
           </template>
         </el-table-column>
-        <el-table-column label="站点" min-width="120">
+        <el-table-column label="站点" min-width="120" align="center">
           <template slot-scope="scope">
             {{ scope.row.site }}
           </template>
@@ -56,14 +56,24 @@
             <span>{{ scope.row.rate }}</span>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="佣金" width="110" align="center">
+        <el-table-column class-name="status-col" label="佣金 RMB" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.commission }}</span>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="总金额" width="110" align="center">
+        <el-table-column class-name="status-col" label="总金额 RMB" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.total }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="订单号" width="200" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.orderNumber }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="备注" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.remark }}</span>
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="状态" width="110" align="center">
@@ -306,10 +316,15 @@ export default {
       })
     },
     complete(id) {
-      completeTask({ id: id }).then(res => {
-        this.$message.success('操作成功')
-        this.fetchData()
-        console.log(res)
+      this.$confirm('确认完成?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        completeTask({ id: id }).then(res => {
+          this.$message.success(res.msg)
+          this.fetchData()
+        })
       })
     },
     handleSelectionChange(val) {

@@ -1,10 +1,14 @@
 <template>
   <div>
     <el-row class="button-wrapper">
-      <el-col><el-button type="primary" @click="open">新建任务</el-button></el-col>
+      <el-col>
+        <el-button type="primary" @click="open">新建任务</el-button>
+        <el-button type="danger" @click="handleMutilDel">批量删除</el-button>
+      </el-col>
     </el-row>
     <el-row>
       <el-table
+        ref="delMultipleTable"
         v-loading="listLoading"
         :data="list"
         element-loading-text="Loading"
@@ -12,13 +16,20 @@
         border
         fit
         highlight-current-row
+        @selection-change="handleMutilDelSelection"
       >
+        <el-table-column
+          fixed="left"
+          type="selection"
+          width="55"
+          align="center"
+        />
         <el-table-column align="center" label="序号" width="95">
           <template slot-scope="scope">
             {{ scope.$index }}
           </template>
         </el-table-column>
-        <el-table-column label="站点" min-width="120">
+        <el-table-column label="站点" min-width="120" align="center">
           <template slot-scope="scope">
             {{ scope.row.site }}
           </template>
@@ -50,7 +61,6 @@
         </el-table-column>
         <el-table-column align="center" prop="created_at" label="单价" width="100">
           <template slot-scope="scope">
-            <i class="el-icon-time" />
             <span>{{ scope.row.price }}</span>
           </template>
         </el-table-column>
@@ -59,14 +69,24 @@
             <span>{{ scope.row.rate }}</span>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="佣金" width="110" align="center">
+        <el-table-column class-name="status-col" label="佣金 RMB" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.commission }}</span>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="总金额" width="110" align="center">
+        <el-table-column class-name="status-col" label="总金额 RMB" width="110" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.total }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="订单号" width="200" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.orderNumber }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column class-name="status-col" label="备注" width="110" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.remark }}</span>
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="状态" width="110" align="center">
@@ -193,7 +213,7 @@
 
 <script>
 import PageComp from '@/components/pageComp/PageComp.vue'
-import { getList, addList, delTask, completeTask } from '@/api/task'
+import { getList, addList, delTask, completeTask, mutilDelTask } from '@/api/task'
 import { getRateList } from '@/api/rate'
 import { mapGetters } from 'vuex'
 import { typeHelper } from '@/utils'
@@ -240,6 +260,7 @@ export default {
       formLabelWidth: '80px',
       dialogFormVisible: false,
       multipleSelection: [],
+      mutiDelSelection: [],
       rateList: [],
       disabled: true,
       showTable: true
@@ -396,6 +417,36 @@ export default {
       this.form.allTotal = 0
       this.multipleSelection = []
       this.$refs.multipleTable.clearSelection()
+    },
+    handleMutilDelSelection(val) {
+      this.mutiDelSelection = val
+      console.log(val)
+    },
+    handleMutilDel() {
+      if (!this.mutiDelSelection.length) {
+        return this.$message.info('至少选择一个')
+      }
+      const ids = []
+      const totals = []
+      this.mutiDelSelection.forEach(row => {
+        ids.push(row.id)
+        totals.push(row.total)
+      })
+      mutilDelTask({
+        ids: ids,
+        totals: totals
+      }).then(res => {
+        if (res.code === 200) {
+          const { length } = res.data
+          if (ids.length === length) {
+            this.$message.success('批量删除操作成功')
+          } else {
+            this.$message.success(`成功批量删除${length}条任务，有${ids.length - length}条任务删除失败，失败原因：已被接单`)
+          }
+          this.mutiDelSelection = []
+          this.fetchData()
+        }
+      })
     }
   }
 }

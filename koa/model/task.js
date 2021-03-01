@@ -4,7 +4,7 @@ const { TASK, RATE } = require('../tools/constant')
 
 
 const getListByAdmin = async (left, right, pageObj) => {
-  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
+  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,a.orderNumber,a.remark,
             b.platform,b.site,b.rate,b.commission
             from ${TASK} a 
             join ${RATE} b 
@@ -13,7 +13,7 @@ const getListByAdmin = async (left, right, pageObj) => {
 }
 
 const getListByBuyer = async (receiveName, left, right, pageObj) => {
-  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
+  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,a.orderNumber,a.remark,
               b.platform,b.site,b.rate,b.commission
               from ${TASK} a 
               join ${RATE} b 
@@ -21,7 +21,7 @@ const getListByBuyer = async (receiveName, left, right, pageObj) => {
   return await find.getJoinList(sql, pageObj)
 }
 const getListByShoper = async (username, left, right, pageObj) => {
-  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
+  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,a.orderNumber,a.remark,
               b.platform,b.site,b.rate,b.commission
               from ${TASK} a 
               join ${RATE} b 
@@ -29,7 +29,7 @@ const getListByShoper = async (username, left, right, pageObj) => {
   return await find.getJoinList(sql, pageObj)
 }
 
-const unreceiveSql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,
+const unreceiveSql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,a.orderNumber,a.remark,
                       b.platform,b.site,b.rate,b.commission
                       from ${TASK} a 
                       join ${RATE} b 
@@ -54,6 +54,7 @@ module.exports = {
   list: (pageObj) => find.list(TASK, pageObj),
   receive: (receiveName, id) => update.updateById(TASK, id, 'receiveName', receiveName, 'status', 2),
   complete,
+  writeOrderNumber: (id, orderNumber, remark) => update.updateById(TASK, id, 'orderNumber', `'${orderNumber}'`, 'remark', `'${remark}'`),
   getListByAdmin,
   getListByBuyer,
   getListByShoper,

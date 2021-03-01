@@ -96,11 +96,11 @@ const findListByParams = async(table, pageObj = { ...PAGEOBJ }, ...params) => {
   // add page
   const { pageNum, pageSize } = pageObj
 
-  if(pageObj.totalSize) {
-    sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
-    const list = await row(sql)
-    return { list, pageObj }
-  }
+  // if(pageObj.totalSize) {
+  //   sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
+  //   const list = await row(sql)
+  //   return { list, pageObj }
+  // }
 
   const { length: totalSize } = await row(sql)
   const totalPage = totalSize > pageSize ? Math.ceil(totalSize / pageSize) : 1
