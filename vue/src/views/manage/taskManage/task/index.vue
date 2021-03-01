@@ -234,7 +234,7 @@ export default {
           totalSize: this.totalSize,
           totalPage: this.totalPage
         },
-        range: [2, 4]
+        range: [1, 4]
       }).then(res => {
         const { list, pageObj } = res.data
         this.totalSize = pageObj.totalSize

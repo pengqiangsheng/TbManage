@@ -58,6 +58,7 @@ const list = async(table, pageObj = { ...PAGEOBJ }, params = []) => {
   pageObj.totalSize = totalSize
   pageObj.totalPage = totalPage
 
+  sql += ` order by id desc`
   sql += ` LIMIT ${(pageNum - 1) * pageSize},   ${pageSize}`
   const list = await row(sql)
 
@@ -107,6 +108,7 @@ const findListByParams = async(table, pageObj = { ...PAGEOBJ }, ...params) => {
   pageObj.totalSize = totalSize
   pageObj.totalPage = totalPage
 
+  sql += ` order by id desc`
   sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
   const list = await row(sql)
   return { list, pageObj }
@@ -133,7 +135,9 @@ const getJoinList = async (sql, pageObj = { ...PAGEOBJ }) => {
   pageObj.totalSize = totalSize
   pageObj.totalPage = totalPage
 
+  sql += ` order by a.id desc`
   sql += ` LIMIT ${(pageNum - 1) * pageSize}, ${pageSize}`
+  
   const list = await row(sql)
   return { list, pageObj }
 }
