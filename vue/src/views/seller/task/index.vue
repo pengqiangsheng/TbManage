@@ -74,7 +74,7 @@
             <el-tag :type="scope.row.status | statusFilter">{{ typeHelper(scope.row.status, taskStatusList) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="操作" width="110" align="center">
+        <el-table-column class-name="status-col" fixed="right" label="操作" width="110" align="center">
           <template slot-scope="scope">
             <el-button v-if="scope.row.status === 1" type="primary" size="small" @click="del(scope.row)">删除</el-button>
             <el-button v-if="scope.row.status === 3" type="primary" size="small" @click="complete(scope.row.id)">确认完成</el-button>
@@ -93,12 +93,9 @@
     <el-dialog title="任务信息" width="600px" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
       <el-row>
         <el-form ref="ruleForm" :model="form" :rules="rules" label-width="80px">
-          <el-col :span="12">
+          <el-col :span="11">
             <el-form-item label="店铺" :label-width="formLabelWidth">
               <el-input v-model="form.shopName" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="网址" :label-width="formLabelWidth" prop="link">
-              <el-input v-model="form.link" autocomplete="off" />
             </el-form-item>
             <el-form-item label="key" :label-width="formLabelWidth">
               <el-input v-model="form.t_key" autocomplete="off" />
@@ -107,7 +104,7 @@
               <el-input v-model="form.sku" autocomplete="off" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="11">
             <el-form-item label="单价" :label-width="formLabelWidth" prop="price">
               <el-row>
                 <el-col :span="3">
@@ -125,11 +122,22 @@
                 </el-col>
               </el-row>
             </el-form-item>
+            <el-form-item label="数量" :label-width="formLabelWidth" prop="number">
+              <el-input-number v-model="form.number" :min="1" :max="10" @change="handleChange" />
+            </el-form-item>
             <el-form-item label="优惠券" :label-width="formLabelWidth">
               <el-input v-model="form.coupon" autocomplete="off" />
             </el-form-item>
-            <el-form-item label="总金额" :label-width="formLabelWidth">
+          </el-col>
+          <el-col :span="22">
+            <el-form-item label="网址" :label-width="'120px'" prop="link">
+              <el-input v-model="form.link" autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="单任务总金额" :label-width="'120px'">
               <el-input v-model="form.total" disabled autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="总共扣费" :label-width="'120px'">
+              <el-input v-model="form.allTotal" disabled autocomplete="off" />
             </el-form-item>
           </el-col>
           <el-col>
@@ -209,21 +217,10 @@ export default {
       typeHelper: typeHelper,
       rules: {
         price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
-        link: [{ required: true, message: '请输入网址', trigger: 'blur' }]
+        link: [{ required: true, message: '请输入网址', trigger: 'blur' }],
+        number: [{ required: true, message: '请输入网址', trigger: 'blur' }]
       },
-      list: [
-        {
-          site: 'http://inner.ink',
-          shop: '好吃点',
-          key: '1',
-          sku: 'sku',
-          price: '99',
-          rate: '1:2',
-          commission: '3',
-          total: '102',
-          status: '1'
-        }
-      ],
+      list: [],
       listLoading: true,
       pageNum: 1,
       pageSize: 10,
@@ -234,16 +231,18 @@ export default {
         link: '',
         t_key: '',
         sku: '',
-        price: '',
-        total: '',
-        coupon: ''
+        price: 0,
+        total: 0,
+        coupon: '',
+        number: 1,
+        allTotal: 0
       },
       formLabelWidth: '80px',
       dialogFormVisible: false,
       multipleSelection: [],
       rateList: [],
       disabled: true,
-      showTable: false
+      showTable: true
     }
   },
   computed: {
@@ -251,7 +250,11 @@ export default {
   },
   watch: {
     'form.price': function(val) {
-      this.showTable = val ? 1 : 0
+      // this.showTable = val ? 1 : 0
+      // if (!val) {
+      //   this.disabled = true
+      // }
+      this.calculate(val)
     }
   },
   created() {
@@ -294,7 +297,9 @@ export default {
         sku: '',
         price: '',
         total: '',
-        coupon: ''
+        coupon: '',
+        number: 1,
+        allTotal: 0
       }
       getRateList().then(res => {
         if (res.code === 200) {
@@ -305,10 +310,24 @@ export default {
       })
     },
     newTask() {
-      const { id } = this.multipleSelection[0]
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
-          addList({ ...this.form, username: this.name, rid: id, status: 1 }).then(res => {
+          const { id: rid } = this.multipleSelection[0]
+          addList({
+            taskInfo: {
+              coupon: this.form.coupon,
+              link: this.form.link,
+              price: this.form.price,
+              shopName: this.form.shopName,
+              sku: this.form.sku,
+              t_key: this.form.t_key,
+              total: this.form.total,
+              username: this.name,
+              rid: rid,
+              status: 1
+            },
+            taskNumber: this.form.number
+          }).then(res => {
             this.$message.success(res.msg)
             this.dialogFormVisible = false
             this.fetchData()
@@ -343,16 +362,40 @@ export default {
         this.$message.info('只能选择一个！')
         return this.clearSelection()
       }
+      if (!val.length) {
+        return this.clearSelection()
+      }
       this.multipleSelection = val
       if (val.length) {
         this.disabled = false
-        console.log(val[0].rate)
-        this.form.total = (parseFloat(this.form.price) / parseFloat(val[0].rate) + parseFloat(val[0].commission)).toFixed(6)
+        this.calculate(this.form.price)
       }
     },
+    calculate(val) {
+      if (!val) {
+        this.$refs.multipleTable && this.clearSelection()
+        return
+      }
+      if (!this.multipleSelection.length) {
+        this.$refs.multipleTable && this.clearSelection()
+        return
+      }
+      this.form.singlePrice = (parseFloat(val) / parseFloat(this.multipleSelection[0].rate) +
+        parseFloat(this.multipleSelection[0].commission)).toFixed(6)
+      this.form.allTotal = this.form.singlePrice * this.form.number
+      this.form.total = this.form.singlePrice
+    },
+    handleChange(value) {
+      this.form.total = this.form.singlePrice
+      this.form.allTotal = this.form.singlePrice * value
+    },
     clearSelection() {
-      this.$refs.multipleTable.clearSelection()
       this.disabled = true
+      this.form.singlePrice = 0
+      this.form.total = 0
+      this.form.allTotal = 0
+      this.multipleSelection = []
+      this.$refs.multipleTable.clearSelection()
     }
   }
 }
@@ -360,5 +403,8 @@ export default {
 <style lang="scss" scoped>
 .button-wrapper {
   margin-bottom: 20px;
+}
+.el-input-number {
+  width: 100%;
 }
 </style>

@@ -50,7 +50,7 @@
             {{ scope.row.updateTime | timeFilter }}
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="操作" min-width="200" align="center">
+        <el-table-column class-name="status-col" fixed="right" label="操作" min-width="100" align="center">
           <template slot-scope="scope">
             <el-button type="primary" @click="appeal(scope.row.id)">申诉</el-button>
           </template>

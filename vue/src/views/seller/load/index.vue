@@ -71,7 +71,7 @@
             <el-tag :type="scope.row.status | statusFilter">{{ typeHelper(scope.row.status, taskStatusList) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column class-name="status-col" label="操作" width="110" align="center">
+        <el-table-column class-name="status-col" fixed="right" label="操作" width="110" align="center">
           <template slot-scope="scope">
             <el-button v-if="scope.row.status === 1" type="primary" size="small" @click="del(scope.row.id)">删除</el-button>
             <el-button v-if="scope.row.status === 3" type="primary" size="small" @click="complete(scope.row.id)">确认完成</el-button>
