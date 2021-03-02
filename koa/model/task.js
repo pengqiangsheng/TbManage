@@ -4,7 +4,7 @@ const { TASK, RATE } = require('../tools/constant')
 
 
 const getListByAdmin = async (left, right, pageObj) => {
-  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,a.orderNumber,a.remark,
+  let sql = `select a.id,a.rid,a.t_key,a.sku,a.price,a.total,a.status,a.link,a.shopName,a.orderNumber,a.remark,a.receiveName,
             b.platform,b.site,b.rate,b.commission
             from ${TASK} a 
             join ${RATE} b 

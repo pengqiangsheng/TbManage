@@ -83,7 +83,7 @@
         </el-table-column>
         <el-table-column class-name="status-col" label="操作" width="110" align="center">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === 4" type="primary" size="small" @click="complete(scope.row.id)">结算</el-button>
+            <el-button v-if="scope.row.status === 4" type="primary" size="small" @click="openBuyerInfo(scope.row)">结算</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -96,77 +96,23 @@
         @pageSize="pageSizeAccept"
       />
     </el-row>
-    <el-dialog title="任务信息" width="600px" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
+    <el-dialog title="刷手信息" width="400px" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
       <el-row>
         <el-form :model="form" label-width="80px">
-          <el-col :span="12">
-            <el-form-item label="店铺" :label-width="formLabelWidth">
-              <el-input v-model="form.shopName" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="网址" :label-width="formLabelWidth">
-              <el-input v-model="form.link" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="key" :label-width="formLabelWidth">
-              <el-input v-model="form.t_key" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="sku" :label-width="formLabelWidth">
-              <el-input v-model="form.sku" autocomplete="off" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="价格" :label-width="formLabelWidth">
-              <el-input v-model="form.price" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="优惠券" :label-width="formLabelWidth">
-              <el-input v-model="form.coupon" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="总金额" :label-width="formLabelWidth">
-              <el-input v-model="form.total" autocomplete="off" />
-            </el-form-item>
-          </el-col>
-          <el-col>
-            <el-table
-              ref="multipleTable"
-              :data="rateList"
-              tooltip-effect="dark"
-              style="width: 100%"
-              @selection-change="handleSelectionChange"
-            >
-              <el-table-column
-                type="selection"
-                width="55"
-              />
-              <el-table-column
-                label="平台"
-                width="120"
-              >
-                <template slot-scope="scope">{{ scope.row.platform }}</template>
-              </el-table-column>
-              <el-table-column
-                label="站点"
-                width="120"
-              >
-                <template slot-scope="scope">{{ scope.row.site }}</template>
-              </el-table-column>
-              <el-table-column
-                label="汇率"
-                show-overflow-tooltip
-              >
-                <template slot-scope="scope">{{ scope.row.rate }}</template>
-              </el-table-column>
-              <el-table-column
-                label="佣金"
-                show-overflow-tooltip
-              >
-                <template slot-scope="scope">{{ scope.row.commission }}</template>
-              </el-table-column>
-            </el-table>
-          </el-col>
+          <el-form-item label="账号" :label-width="formLabelWidth">
+            <el-input v-model="form.receiveName" disabled autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="银行卡号" :label-width="formLabelWidth">
+            <el-input v-model="form.bankCardNo" disabled autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="银行信息" :label-width="formLabelWidth">
+            <el-input v-model="form.bankCardInfo" disabled autocomplete="off" />
+          </el-form-item>
         </el-form>
       </el-row>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" :disabled="disabled" @click="newTask">确 定</el-button>
+        <el-button type="primary" @click="complete">结算</el-button>
       </div>
     </el-dialog>
   </div>
@@ -203,13 +149,10 @@ export default {
       totalSize: 0,
       totalPage: 0,
       form: {
-        shopName: '',
-        link: '',
-        t_key: '',
-        sku: '',
-        price: '',
-        total: '',
-        coupon: ''
+        receiveName: '',
+        bankCardInfo: '',
+        bankCardNo: '',
+        id: ''
       },
       formLabelWidth: '80px',
       dialogFormVisible: false,
@@ -251,25 +194,6 @@ export default {
       this.pageSize = val
       this.fetchData()
     },
-    open() {
-      this.dialogFormVisible = true
-      this.form = {
-        shopName: '',
-        link: '',
-        t_key: '',
-        sku: '',
-        price: '',
-        total: '',
-        coupon: ''
-      }
-      getRateList().then(res => {
-        if (res.code === 200) {
-          this.rateList = res.data.list
-        } else {
-          this.$message.error('系统出错')
-        }
-      })
-    },
     newTask() {
       this.disabled = true
       this.dialogFormVisible = false
@@ -288,15 +212,16 @@ export default {
         console.log(res)
       })
     },
-    complete(id) {
+    complete() {
       this.$confirm('确认结算完成?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        completeTask({ id: id }).then(res => {
+        completeTask({ id: this.form.id }).then(res => {
           this.$message.success(res.msg)
           this.fetchData()
+          this.dialogFormVisible = false
         })
       })
     },
@@ -311,6 +236,11 @@ export default {
     clearSelection() {
       this.$refs.multipleTable.clearSelection()
       this.disabled = true
+    },
+    openBuyerInfo({ receiveName, id}) {
+      this.form.receiveName = receiveName
+      this.form.id = id
+      this.dialogFormVisible = true
     }
   }
 }
