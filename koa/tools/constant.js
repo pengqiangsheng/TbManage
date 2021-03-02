@@ -1,11 +1,10 @@
 module.exports = {
   SECRET: 'pqs-secret',
-  CAT: 'cat',
   CLEARCACHE: 'clearCache',
-  TASK: 'tasks',
-  USER: 'users',
-  BILL: 'recharge_bills',
-  RATE: 'rates',
-  LOG: 'logs',
-  CONFIG: 'system_config'
+  TASK: 'ss_tasks',
+  USER: 'ss_users',
+  BILL: 'ss_recharge_bills',
+  RATE: 'ss_rates',
+  LOG: 'ss_logs',
+  CONFIG: 'ss_system_config'
 }
