@@ -21,5 +21,7 @@ module.exports = {
     value: name
   }),
   topUp: (id, money) => update.updateById(USER, id, 'money', money),
-  pay: (id, money) => update.updateById(USER, id, 'money', money)
+  pay: (id, money) => update.updateById(USER, id, 'money', money),
+  modifyPwd: (id, pwd) => update.updateById(USER, id, 'password', pwd),
+  updateBank: (id, cardNo, cardInfo) => update.updateById(USER, id, 'bankCardNo', cardNo, 'bankCardInfo', cardInfo)
 }

@@ -69,3 +69,19 @@ export function billApply(data) {
     data
   })
 }
+
+export function modifyPwd(data) {
+  return request({
+    url: '/user/modify/pwd',
+    method: 'post',
+    data
+  })
+}
+
+export function updateBankInfo(data) {
+  return request({
+    url: '/user/bank/update',
+    method: 'post',
+    data
+  })
+}

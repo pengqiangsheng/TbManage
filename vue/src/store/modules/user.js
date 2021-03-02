@@ -76,11 +76,11 @@ const actions = {
     return new Promise((resolve, reject) => {
       getInfo().then(res => {
         if (res.code === 200) {
-          const { roles, username } = res.data
+          const { roles, username, avatar } = res.data
           commit('SET_ROLES', [roles])
           commit('SET_NAME', username)
           commit('SET_USER', res.data)
-          commit('SET_AVATAR', 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif')
+          commit('SET_AVATAR', avatar)
           resolve(res.data)
         } else {
           reject(res.msg)

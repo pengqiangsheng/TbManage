@@ -66,7 +66,7 @@ const list = async(table, pageObj = { ...PAGEOBJ }, params = []) => {
 }
 
 /**
- * 
+ * 查找一个匹配的数据
  * @param {*表名} table 
  * @param {*key-value} params 
  */
@@ -78,7 +78,7 @@ const findByparams = async(table, params) => {
 }
 
 /**
- * 查找数据
+ * 查找数据集合
  * @param {*表名} table 
  * @param {*params} params 
  */

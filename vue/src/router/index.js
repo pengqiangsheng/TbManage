@@ -59,18 +59,6 @@ export const constantRoutes = [
       component: () => import('@/views/dashboard/index'),
       meta: { title: 'Dashboard', icon: 'dashboard' }
     }]
-  },
-
-  {
-    path: '/about',
-    name: '',
-    component: Layout,
-    children: [{
-      path: 'index',
-      name: 'about',
-      component: () => import('@/views/about/index'),
-      meta: { title: '充值入口', icon: 'dashboard' }
-    }]
   }
   // {
   //   path: '/example',
@@ -115,6 +103,28 @@ export const asyncRoutes = [
         }
       }
     ]
+  },
+  {
+    path: '/about',
+    name: '',
+    component: Layout,
+    children: [{
+      path: 'index',
+      name: 'about',
+      component: () => import('@/views/about/index'),
+      meta: { title: '充值入口', icon: 'dashboard', roles: ['shoper', 'admin'] }
+    }]
+  },
+  {
+    path: '/accountManage',
+    name: '',
+    component: Layout,
+    children: [{
+      path: 'index',
+      name: 'accountManage',
+      component: () => import('@/views/buyer/accountManage//index'),
+      meta: { title: '账号信息', icon: 'dashboard', roles: ['buyer'] }
+    }]
   },
   {
     path: '/recharge',

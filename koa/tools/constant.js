@@ -6,5 +6,6 @@ module.exports = {
   USER: 'users',
   BILL: 'recharge_bills',
   RATE: 'rates',
-  LOG: 'logs'
+  LOG: 'logs',
+  CONFIG: 'system_config'
 }
