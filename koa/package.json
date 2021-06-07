@@ -24,7 +24,8 @@
   "scripts": {
     "start": "set NODE_ENV=production&& set DEBUG=app:*&& nodemon app.js",
     "dev": "set NODE_ENV=development&& set DEBUG=app:*&& nodemon app.js",
-    "debug": "nodemon --inspect app.js"
+    "debug": "nodemon --inspect app.js",
+    "stage": "DEBUG=app:* NODE_ENV=production nodemon app.js"
   },
   "author": "pengqiangsheng",
   "license": "ISC"
